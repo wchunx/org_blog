@@ -127,7 +127,7 @@ ovs-vsctl show
                 type: gre
                 options: {in_key=flow, local_ip="192.168.1.100", out_key=flow, remote_ip="192.168.1.102"}
 #+END_SRC
-除了连接br-in的patch-in,还有两条GRE通道，分别用来联通两台计算节点。
+除了连接br-in的patch-in,还有两条GRE通道，分别用来连通两台计算节点。
 ** 跨compute node的VM通信
 一台计算节点br-tun的初始策略
 #+BEGIN_SRC sh
@@ -165,13 +165,44 @@ VM1 ping VM2的ARP包：
 户网络tunnel id,目的MAC为VM2，动作为转发到对应VM2所在的node2的GRE tunnel。
 也就是说，VM1再与VM2通信就不会经理flood的过程了。
 *** 结论
-br-tun除了实现GRE外还起到了交换机的学习功能。如果是多播，广播或不
-
-
-下图说明了数据包在不同table的流程。
-
+br-tun除了实现GRE外还起到了交换机的学习功能。如果是多播，广播或未知的单播地址，
+br-tun会将包转发到所有GRE tunnel,否则，如果它从之前的通信中获取到了目的MAC,
+br-tun会直接将包发达正确的GRE tunnel.
+*** 数据包走向图
+下图说明了数据包在不同table的走向。
+#+ATTR_HTML: :width 10 :height 10
 file:../static/img/2014-01/gre-flow-table-flow-chart1.png
+**** 出去的流量
+table0有4条flow，最后一条默认drop。br-tun有两条GRE tunnel,ofport分别
+为2和3.table0把GRE tunnel过来的包(in_port 2和3),resubmit到table2处
+理，而本地VM的流量(从br-int,patch-int——in_port为1),resubmit到table1.
+
+table1获取通过br-int过来的本地VM流量，如果目的为单播地址，resubmit到table
+20,否则resubmit到table21.
+
+table20或取到VM的单播数据包.如果是已经学习到的目的地址，会转发到正确的GRE
+tunnel,否则resubmit到 table21.
+
+table21获取多播、广播和未知目的的数据包。去掉VLAN tag,并发给所有GRE tunnel.
+你可能疑问，数据包的tag是哪来的。通过ovs-vsctl show可以看到br-int上的port
+是access port,每个租户网络都分配了VLAN tag。
+**** 进来的流量
+从table0的flow看到，从GRE tunnel过来的流量resubmit到table2.
+
+table2中，应为每个租户网络tunnel ID与VLAN对应，Tunnel ID 0x1388的数据
+包打上tag1，resubmit到table10.
+
+table10只有一条规则，接受所有数据，学习并根据学习结果在table20中创建一条新
+规则——匹配来自VM的单播数据包。
+*** 租户网络的隔离
+GRE实现了跨计算节点的VM的通信，同时也需要提供租户网络间的隔离。
+
+计算节点上br-in的access port会将从VM出来的数据包加上tag，同一租户的网络数据
+tag一致。
+
+跨计算节点会用到GRE tunnel ID.每个租户网络既有GRE tunnel ID，也有VLAN
+tag。带有GRE tunnel ID的进入流量会在table2中被添加上对应的VLAN tag。然后
+带有VLAN tag的数据包转发到br-int。
 * 参考
 [[http://assafmuller.wordpress.com/2013/10/14/gre-tunnels-in-openstack-neutron/][GRE Tunnels in OpenStack Neutron]] \\
 [[http://www.revolutionlabs.net/2013/11/what-commands-are-called-during-startup_28.html][neutron-plugin-openvswitch-agent startup]]
-

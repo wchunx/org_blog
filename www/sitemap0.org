@@ -17,6 +17,7 @@
    + Linux
      + [[file:Linux/root_passwd.org][Linux系统忘记root密码的解决办法]]
    + Openstack
+     + [[file:Openstack/ovs-agent-cmd.org][neutron-plugin-openvswitch-agent启动时的ovs命令调用]]
      + [[file:Openstack/openstack-network.org][openstack Essex网络结构]]
      + [[file:Openstack/openstack-havana-all-in-one-deploy.org][openstack havana all-in-one部署]]
      + [[file:Openstack/openstack-havana-multi-deploy.org][openstack havana 多节点部署]]
