@@ -1,0 +1,135 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+TITLE: Emacs24安装与配置
+#+DATE: 2014-01-12 16:54
+#+OPTIONS: ^:{}
+* 安装Emacs24.3.1
+** 卸载Emacs23
+#+BEGIN_SRC sh
+sudo apt-get purge emacs23* emacs23-bin-common* emacs23-common* emacsen-common && sudo apt-get autoremove
+#+END_SRC
+** 安装Emacs24.3.1
+PPA方式
+#+BEGIN_SRC sh
+sudo add-apt-repository ppa:cassou/emacs
+sudo apt-get update
+sudo apt-get install emacs24 emacs24-el emacs24-common-non-dfsg
+#+END_SRC
+* 安装ecb
+ecb是emacs中的代码浏览工具，依赖cedet。cedet使用Emacs24.3.1自带的。
+clone的[[http://alexott.blogspot.de/2012/06/ecb-fresh-emacscedet.html][这篇文章]] 作者的ecb代码。
+#+BEGIN_SRC sh
+cd ~/.emacs.d/plugins/
+git clone https://github.com/alexott/ecb/
+#+END_SRC
+init.el中ecb的配置
+#+BEGIN_SRC elisp
+;;cedet
+(require 'semantic)
+(require 'semantic/sb)
+(require 'srecode)
+(global-ede-mode 1)
+(semantic-mode 1)
+;;ecb
+(add-to-list 'load-path "~/.emacs.d/plugins/ecb")
+(require 'ecb)
+(setq stack-trace-on-error nil)
+;;鼠标支持：Emacs中执行“M-x ecb-customize-most-important”，找到“Ecb Primary Secondary Mouse Buttons”选项，将其设为“Primary: mouse-1, secondary: mouse-2”，并且>以“Save for Future Sessions”保存。
+;;自动启动ecb
+;; (setq ecb-auto-activate t)
+;;F7:打开ecb
+(global-set-key  [(f7)] 'ecb-activate)
+;;F8:关闭ecb
+(global-set-key  [(f8)] 'ecb-deactivate)
+;;关闭ecb启动窗口
+(setq ecb-tip-of-the-day nil)
+#+END_SRC
+** ecb布局
+[[http://blog.yxwang.me/2010/02/bind-cscope-to-ecb/][ecb和cscope的结合使用]] \\
+[[http://utkarshsengar.com/2011/06/emacs-python/][My emacs setup for python dev]] \\
+** 参考资料
+关于内置cedet的配置这几篇介绍不错 \\
+http://stackoverflow.com/questions/8038114/emacs-24-builtin-cedet-function-highlight \\
+http://www.cnblogs.com/zfreay#sec-2.2 \\
+http://emacser.com/built-in-cedet.htm
+
+cedet的详细说明 \\
+http://cxwangyi.wordpress.com/2010/08/21/using-cedet-with-emacs/ \\
+http://alexott.net/en/writings/emacs-devenv/EmacsCedet.html
+
+[[http://jinganglang777.blog.163.com/blog/static/790854972012127104446221/][让Emacs功能强于Source Insight]] \\
+[[http://www.wolinlabs.com/blog/emacs.global.speedbar.html][Code Browsing with Emacs, GLOBAL, and Speedbar]]
+* Emacs多窗口操作
+** 典型的工作流
+1. 在两个子窗口中对比文件内容
+2. 打开更多的窗口以参考其他信息.
+3. 对某个窗口内容比较有兴趣,跳转到该窗口,将该窗口最大化
+4. 看完最大化的窗口内容后,undo最大化操作,重新回到早先的多个小窗口模式以便继续纵览全局
+** 将子窗口自动编号,然后按M-0…9跳转(最爱)
+安装[[https://github.com/nschum/window-numbering.el][window-numbering.el]] ,然后在.emacs中添加以下代码,
+#+BEGIN_SRC sh
+(require 'window-numbering)
+(window-numbering-mode 1)
+#+END_SRC
+** undo/redo之前的窗口操作
+使用winer-mode,默认C-c <left>和C-c <right>来对窗口布局实现undo/redo, .emacs中添加
+#+BEGIN_SRC sh
+(winner-mode t)
+#+END_SRC
+** 光标移动到下一窗口(常用)
+M-x other-window,快捷键是`C-x o`.
+** 水平/垂直切分当前窗口(常用)
+快捷键C-x 2/3
+** 将当前子窗口最大化(常用)
+M-x delete-other-windows,快捷键`C-x 1`.
+** 删除当前子窗口(偶尔用)
+M-x delete-window,快捷键`C-x 0`.
+** 移动光标到上下左右的窗口(基本不用)
+因我较喜欢vi快捷键,所以我安装了Evil Mode.快捷键和Vi一样.C-w h/j/k/l移动至各方向的子窗口.
+** 存储/载入窗口布局到register(基本不用)
+`C-x r w <register>`存储,`C-x r j <register>`载入.
+*** 参考资料
+[[http://blog.csdn.net/redguardtoo/article/details/7768233][Emacs中的完美多窗口操作 ]]
+
+[[http://www.cnblogs.com/bamanzi/archive/2011/08/20/some-emacs-window-utils.html][Emacs窗口管理几个好东东]]
+* Python环境配置
+** 参考资料
+[[http://tkf.github.io/emacs-jedi/][主要参考1]] \\
+[[http://caisah.info/emacs-for-python/][主要参考2]] \\
+[[https://code.djangoproject.com/wiki/Emacs][django配置]] \\
+[[http://jack-kelly.com/setting_up_emacs_for_python_development][Setting up Emacs for Python development ]] \\
+* [[http://cnlox.is-programmer.com/posts/10354.html][GTD]]
+* Emacs配置参考
+[[http://www.cinsk.org/emacs/emacs-artist.html][Emacs画图Artist Mode]] \\
+[[http://lifegoo.pluskid.org/wiki/Emacs.html][星黎殿]] \\
+[[http://forum.ubuntu.org.cn/viewtopic.php?t=136768][emacs推广，配置详细介绍]] \\
+[[http://blog.csdn.net/jinzhuojun/article/details/1786451][程序员的emacs配置大全(cedet+ecb+cscope+gdb-ui)-jzj ]]
+* 使用问题
+1.安装ELPA包管理器并安装扩展，Emacs启动报错“cannot open load file” for ~/.emacs.d/elpa/archives/-pkg
+
+解决办法：touch ~/.emacs.d/elpa/archives/-pkg
+
+2.启动Emacs报错Symbol's function definition is void: loop
+
+解决办法：.emacs添加 (require 'cl)
+
+3.Emacs23中去掉工具栏菜单栏和滚动条的配置
+#+BEGIN_SRC elisp
+(tool-bar-mode nil)
+(menu-bar-mode nil)
+(scroll-bar-mode nil)
+#+END_SRC
+Emacs24中上面的设置是无效的，需要改为
+#+BEGIN_SRC elisp
+(tool-bar-mode 0)
+(menu-bar-mode 0)
+(scroll-bar-mode 0)
+#+END_SRC
+4.flet和labels的warning.装完auto-compute，启动emacs总会出下面两条warning
+#+BEGIN_SRC sh
+`flet' is an obsolete macro (as of 24.3); use either `cl-flet' or `cl-letf'.
+`labels' is an obsolete macro (as of 24.3); use `cl-labels' instead.
+#+END_SRC
+[[http://ergoemacs.org/emacs/emacs_24_common_lisp_package_name_change.html][这里]] 有点介绍.
+5.打开c文件报错:wrong-type-argument stringp 1
+
+解决办法：安装g++,参考[[http://www.cnblogs.com/machine/archive/2012/11/20/2779621.html][1]]

@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Mysql常用命令</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Mysql常用命令"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-14 20:42"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Mysql常用命令</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 连接</a></li>
+<li><a href="#sec-2">2 大小写问题</a></li>
+<li><a href="#sec-3">3 修改密码</a>
+<ul>
+<li><a href="#sec-3-1">3.1 终端修改</a></li>
+<li><a href="#sec-3-2">3.2 mysql命令行中修改密码</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 忘记root密码解决办法</a>
+<ul>
+<li><a href="#sec-4-1">4.1 修改mysql登录设置</a></li>
+<li><a href="#sec-4-2">4.2 重启mysql</a></li>
+<li><a href="#sec-4-3">4.3 登录mysql修改密码</a></li>
+<li><a href="#sec-4-4">4.4 将mysql登录设置修改回来</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 用户操作</a>
+<ul>
+<li><a href="#sec-5-1">5.1 添加用户</a></li>
+<li><a href="#sec-5-2">5.2 取消权限</a></li>
+<li><a href="#sec-5-3">5.3 修改指定用户密码</a></li>
+<li><a href="#sec-5-4">5.4 删除用户</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6 常用命令</a>
+<ul>
+<li><a href="#sec-6-1">6.1 增、删、改、查</a></li>
+<li><a href="#sec-6-2">6.2 备份</a></li>
+</ul>
+</li>
+<li><a href="#sec-7">7 参考</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 连接</h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#38656;&#23433;&#35013;mysql-client</span>
+mysql -h&#20027;&#26426;&#22320;&#22336; -u&#29992;&#25143;&#21517; -p&#23494;&#30721;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25110;&#32773;</span>
+mysql -u &#29992;&#25143;&#21517; -p <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22238;&#36710;&#21518;&#36755;&#20837;&#23494;&#30721;</span>
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 大小写问题</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>sql语句命令不区别大小写的。一些人习惯把关键词大写出来显示，方便阅读
+</p><ol>
+<li>mysql在linux下数据库名、表名、列名、别名大小写规则如下
+<ul>
+<li>数据库名与表名是严格区分大小写的
+</li>
+<li>表的别名是严格区分大小写的
+</li>
+<li>列名与列的别名在所有的情况下均是忽略大小写的
+</li>
+<li>变量名严格区分大小写
+</li>
+</ul>
+
+</li>
+<li>mysql在windows下都不区分大小写
+</li>
+</ol>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 修改密码</h2>
+<div class="outline-text-2" id="text-3">
+
+
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 终端修改</h3>
+<div class="outline-text-3" id="text-3-1">
+
+<p>刚装好mysql，root用户没有密码
+</p>
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21021;&#22987;&#35774;&#23494;&#30721;</span>
+mysqladmin -uroot password 123456
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25913;&#23494;</span>
+mysqladmin -uroot -p&#26087;&#23494;&#30721; password <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22238;&#36710;&#36755;&#20837;&#26032;&#23494;&#30721;</span>
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> mysql命令行中修改密码</h3>
+<div class="outline-text-3" id="text-3-2">
+
+
+
+
+<pre class="src src-sh">mysql&gt; UPDATE mysql.user SET <span style="color: #268bd2;">password</span>=PASSWORD(<span style="color: #2aa198;">'&#26032;&#23494;&#30721;'</span>) WHERE <span style="color: #268bd2;">User</span>=&#8217;root&#8217;;
+mysql&gt; FLUSH PRIVILEGES;
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 忘记root密码解决办法</h2>
+<div class="outline-text-2" id="text-4">
+
+
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 修改mysql登录设置</h3>
+<div class="outline-text-3" id="text-4-1">
+
+<p>修改/etc/mysql/my.cnf,[mysqld]的段中加上一句：skip-grant-tables，例如：
+</p>
+
+
+<pre class="src src-sh">[mysqld]
+<span style="color: #268bd2;">datadir</span>=/var/lib/mysql
+<span style="color: #268bd2;">socket</span>=/var/lib/mysql/mysql.sock
+skip-grant-tables
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 重启mysql</h3>
+<div class="outline-text-3" id="text-4-2">
+
+
+
+
+<pre class="src src-sh">/etc/init.d/mysql restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 登录mysql修改密码</h3>
+<div class="outline-text-3" id="text-4-3">
+
+<p>这时候登录mysql已经不需要密码了，修改密码即可。
+</p>
+
+
+<pre class="src src-sh">mysql&gt; UPDATE mysql.user SET <span style="color: #268bd2;">password</span>=PASSWORD(<span style="color: #2aa198;">'123456'</span>) WHERE <span style="color: #268bd2;">User</span>=<span style="color: #2aa198;">'root'</span>;
+mysql&gt; FLUSH PRIVILEGES;
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> 将mysql登录设置修改回来</h3>
+<div class="outline-text-3" id="text-4-4">
+
+<p>去掉my.cnf添加的skip-grant-tables，重启mysql
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 用户操作</h2>
+<div class="outline-text-2" id="text-5">
+
+
+</div>
+
+<div id="outline-container-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 添加用户</h3>
+<div class="outline-text-3" id="text-5-1">
+
+<p>创建用户并赋予权限的命令
+mysql&gt; grant 权限1,权限2,…权限n on 数据库名称.表名称 to 用户名@用户地址 identified by '连接口令';
+</p>
+<ul>
+<li>权限1,权限2,…权限n代表select,insert,update,delete,create,drop,index,alter,grant,references,reload,shutdown,process,file等14个权限。
+</li>
+<li>当权限1,权限2,…权限n被all privileges或者all代替，表示赋予用户全部权限。
+</li>
+<li>当数据库名称.表名称被*.*代替，表示赋予用户操作服务器上所有数据库所有表的权限。
+</li>
+<li>用户地址可以是localhost，也可以是ip地址、机器名字、域名。也可以用'%'表示从任何地址连接。
+</li>
+<li>'连接口令'不能为空，否则创建失败。
+</li>
+</ul>
+
+<p>例如：创建用户test1，只能本地登录，并可对vm_db数据库进行查询，插入,修改和删除操作
+</p>
+
+
+<pre class="src src-sh">mysql&gt;grant select,insert,update,drop vm_db.* to test1@localhost identified by <span style="color: #2aa198;">'test1'</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22914;&#26524;&#19981;&#24819;test1&#26377;&#23494;&#30721;&#65292;&#21487;&#20197;&#22312;&#25171;&#19968;&#20010;&#21629;&#20196;&#23558;&#23494;&#30721;&#21462;&#28040;</span>
+mysql&gt;grant select,insert,update,drop vm_db.* to test1@localhost identified by <span style="color: #2aa198;">''</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21047;&#26032;&#31995;&#32479;&#26435;&#38480;&#34920;</span>
+mysql&gt;flush privileges;
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> 取消权限</h3>
+<div class="outline-text-3" id="text-5-2">
+
+<p>取消test1的删除权限
+</p>
+
+
+<pre class="src src-sh">mysql&gt; REVOKE DELETE on vm_db.* from test1@<span style="color: #2aa198;">'localhost'</span>;
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> 修改指定用户密码</h3>
+<div class="outline-text-3" id="text-5-3">
+
+
+
+
+<pre class="src src-sh">mysql&gt;update mysql.user set <span style="color: #268bd2;">password</span>=password(<span style="color: #2aa198;">'&#26032;&#23494;&#30721;'</span>) where <span style="color: #268bd2;">User</span>=<span style="color: #2aa198;">"test1"</span> and <span style="color: #268bd2;">Host</span>=<span style="color: #2aa198;">"localhost"</span>;
+mysql&gt;flush privileges;
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5-4" class="outline-3">
+<h3 id="sec-5-4"><span class="section-number-3">5.4</span> 删除用户</h3>
+<div class="outline-text-3" id="text-5-4">
+
+<p>root身份登录数据库后
+</p>
+
+
+<pre class="src src-sh">mysql&gt;use mysql;
+mysql&gt;DELETE FROM user WHERE <span style="color: #268bd2;">User</span>=<span style="color: #2aa198;">"test1"</span> and <span style="color: #268bd2;">Host</span>=<span style="color: #2aa198;">"localhost"</span>;
+mysql&gt;flush privileges;
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 常用命令</h2>
+<div class="outline-text-2" id="text-6">
+
+
+</div>
+
+<div id="outline-container-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 增、删、改、查</h3>
+<div class="outline-text-3" id="text-6-1">
+
+
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26597;&#35810;&#26102;&#38388;</span>
+mysql&gt;select now();
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26597;&#35810;&#29992;&#25143;</span>
+mysql&gt;select user();
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26597;&#35810;&#25968;&#25454;&#24211;&#29256;&#26412;</span>
+mysql&gt;select version();
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26597;&#35810;&#24403;&#21069;&#25968;&#25454;&#24211;</span>
+mysql&gt;select database();
+
+mysql&gt;show databases;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21024;&#38500;&#25968;&#25454;&#24211;</span>
+mysql&gt;drop database if exists vm_db;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21019;&#24314;&#25968;&#25454;&#24211;</span>
+mysql&gt;create database if not exists vm_db;
+mysql&gt;use vm_db;
+mysql&gt;show tables;
+mysql&gt;create table if not exists vms(name varchar(20), id int);
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25554;&#20837;&#25968;&#25454;</span>
+mysql&gt;insert into vms values(<span style="color: #2aa198;">'vm1'</span>, 1)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26356;&#26032;&#25968;&#25454;</span>
+mysql&gt;update vms set <span style="color: #268bd2;">name</span>=<span style="color: #2aa198;">'vm0'</span> where <span style="color: #268bd2;">id</span>=1;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22797;&#21046;&#34920;&#26426;&#26500;</span>
+mysql&gt;create table vms1 select * from vms where 1&lt;&gt;1;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22797;&#21046;&#23436;&#25972;&#34920;</span>
+mysql&gt;create table vms2 select * from vms;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#34920;&#37325;&#21629;&#21517;</span>
+mysql&gt;alter table vms rename as vms0;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26174;&#31034;&#34920;&#32467;&#26500;</span>
+mysql&gt;describe vms0;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26174;&#31034;&#34920;&#35760;&#24405;</span>
+mysql&gt;select * from vms0;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#28165;&#31354;&#34920;&#35760;&#24405;</span>
+mysql&gt;delete from vms0;
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21024;&#38500;&#34920;</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">mysql&gt;drop table if exists vms0;</span>
+
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 备份</h3>
+<div class="outline-text-3" id="text-6-2">
+
+
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22791;&#20221;MySQL&#25968;&#25454;&#24211;&#30340;&#21629;&#20196;</span>
+mysqldump -hhostname -uusername -ppassword databasename &gt; backupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22791;&#20221;MySQL&#25968;&#25454;&#24211;&#20026;&#24102;&#21024;&#38500;&#34920;&#30340;&#26684;&#24335;&#65292;&#33021;&#22815;&#35753;&#35813;&#22791;&#20221;&#35206;&#30422;&#24050;&#26377;&#25968;&#25454;&#24211;&#32780;&#19981;&#38656;&#35201;&#25163;&#21160;&#21024;&#38500;&#21407;&#26377;&#25968;&#25454;&#24211;&#12290;</span>
+mysqldump -&#8211;add-drop-table -uusername -ppassword databasename &gt; backupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#30452;&#25509;&#23558;MySQL&#25968;&#25454;&#24211;&#21387;&#32553;&#22791;&#20221;</span>
+mysqldump -hhostname -uusername -ppassword databasename | gzip &gt; backupfile.sql.gz
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22791;&#20221;MySQL&#25968;&#25454;&#24211;&#26576;&#20010;(&#20123;)&#34920;</span>
+mysqldump -hhostname -uusername -ppassword databasename specific_table1 specific_table2 &gt; backupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21516;&#26102;&#22791;&#20221;&#22810;&#20010;MySQL&#25968;&#25454;&#24211;</span>
+mysqldump -hhostname -uusername -ppassword --databases databasename1 databasename2 databasename3 &gt; multibackupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20165;&#20165;&#22791;&#20221;&#25968;&#25454;&#24211;&#32467;&#26500;</span>
+mysqldump -hhostname -uusername -ppassword --no-data --databases databasename1 databasename2 databasename3 &gt; structurebackupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22791;&#20221;&#26381;&#21153;&#22120;&#19978;&#25152;&#26377;&#25968;&#25454;&#24211;</span>
+mysqldump --all-databases &gt; allbackupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36824;&#21407;MySQL&#25968;&#25454;&#24211;&#30340;&#21629;&#20196;</span>
+mysql -hhostname -uusername -ppassword databasename &lt; backupfile.sql
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36824;&#21407;&#21387;&#32553;&#30340;MySQL&#25968;&#25454;&#24211;</span>
+gunzip &lt; backupfile.sql.gz | mysql -uusername -ppassword databasename
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#23558;&#25968;&#25454;&#24211;&#36716;&#31227;&#21040;&#26032;&#26381;&#21153;&#22120;</span>
+mysqldump -uusername -ppassword databasename | mysql --host=*.*.*.* -C databasename
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 参考</h2>
+<div class="outline-text-2" id="text-7">
+
+<p><a href="http://www.cnblogs.com/jyginger/archive/2011/04/27/2030017.html">修改mysql用户密码</a> <br/>
+<a href="http://gsion.blog.163.com/blog/static/1230565042011413112323446/?suggestedreading&amp;wumii">MySQL基础命令</a>
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-14 20:42.</p> 
+</div>
+</body>
+</html>

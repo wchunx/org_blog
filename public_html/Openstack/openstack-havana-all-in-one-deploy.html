@@ -1,0 +1,1984 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>openstack havana all-in-one部署</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="openstack havana all-in-one部署"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-07 10:38"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">openstack havana all-in-one部署</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 修改记录</a></li>
+<li><a href="#sec-2">2 部署环境</a></li>
+<li><a href="#sec-3">3 初始网卡配置</a></li>
+<li><a href="#sec-4">4 添加havana源</a></li>
+<li><a href="#sec-5">5 安装mysql和rabbitmq</a>
+<ul>
+<li><a href="#sec-5-1">5.1 创建数据库</a></li>
+<li><a href="#sec-5-2">5.2 安装rabbitmq</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6 安装和配置Keystone</a>
+<ul>
+<li><a href="#sec-6-1">6.1 安装</a></li>
+<li><a href="#sec-6-2">6.2 删除默认keystone的sqlite db 文件</a></li>
+<li><a href="#sec-6-3">6.3 配置openssl</a></li>
+<li><a href="#sec-6-4">6.4 修改配置文件</a>
+<ul>
+<li><a href="#sec-6-4-1">6.4.1 修改/etc/keystone/keystone.conf</a></li>
+<li><a href="#sec-6-4-2">6.4.2 同步keystone表数据到db中并重启keystone</a></li>
+</ul>
+</li>
+<li><a href="#sec-6-5">6.5 创建tenant、user、roles</a>
+<ul>
+<li><a href="#sec-6-5-1">6.5.1 首先创建两个环境变量</a></li>
+<li><a href="#sec-6-5-2">6.5.2 创建admin和service两个租户</a></li>
+<li><a href="#sec-6-5-3">6.5.3 创建用户admin，密码password</a></li>
+<li><a href="#sec-6-5-4">6.5.4 创建角色admin</a></li>
+<li><a href="#sec-6-5-5">6.5.5 关联用户、角色、租户</a></li>
+</ul>
+</li>
+<li><a href="#sec-6-6">6.6 创建Services 及 API endpoints</a></li>
+<li><a href="#sec-6-7">6.7 验证认证服务(Keystone)安装是否成功</a></li>
+</ul>
+</li>
+<li><a href="#sec-7">7 安装和配置glance</a>
+<ul>
+<li><a href="#sec-7-1">7.1 安装</a></li>
+<li><a href="#sec-7-2">7.2 修改glance配置文件</a></li>
+<li><a href="#sec-7-3">7.3 同步数据库</a></li>
+<li><a href="#sec-7-4">7.4 创建名为glance的认证用户</a></li>
+<li><a href="#sec-7-5">7.5 创建service服务和endpoint</a></li>
+<li><a href="#sec-7-6">7.6 重启glance服务</a></li>
+<li><a href="#sec-7-7">7.7 上传镜像</a></li>
+</ul>
+</li>
+<li><a href="#sec-8">8 安装和配置nova</a>
+<ul>
+<li><a href="#sec-8-1">8.1 安装计算服务</a></li>
+<li><a href="#sec-8-2">8.2 修复guestfs的一个bug</a></li>
+<li><a href="#sec-8-3">8.3 删除默认nova的sqlite db文件</a></li>
+<li><a href="#sec-8-4">8.4 修改配置文件</a></li>
+<li><a href="#sec-8-5">8.5 创建用户与角色</a></li>
+<li><a href="#sec-8-6">8.6 创建service服务和endpoint</a></li>
+<li><a href="#sec-8-7">8.7 重启nova服务</a></li>
+</ul>
+</li>
+<li><a href="#sec-9">9 Block Storage (Cinder)安装</a>
+<ul>
+<li><a href="#sec-9-1">9.1 安装服务</a></li>
+<li><a href="#sec-9-2">9.2 建立一个逻辑卷卷组 cinder-volumes</a></li>
+<li><a href="#sec-9-3">9.3 修改配置文件</a></li>
+<li><a href="#sec-9-4">9.4 创建用户，角色，服务和endpoint</a></li>
+<li><a href="#sec-9-5">9.5 同步数据并重启服务</a></li>
+<li><a href="#sec-9-6">9.6 检查</a></li>
+</ul>
+</li>
+<li><a href="#sec-10">10 安装和配置neutron</a>
+<ul>
+<li><a href="#sec-10-1">10.1 创建用户，服务和endpoint</a></li>
+<li><a href="#sec-10-2">10.2 安装网络服务</a>
+<ul>
+<li><a href="#sec-10-2-1">10.2.1 安装neutron组件</a></li>
+<li><a href="#sec-10-2-2">10.2.2 打开ip_forward</a></li>
+<li><a href="#sec-10-2-3">10.2.3 编辑配置文件</a></li>
+</ul>
+</li>
+<li><a href="#sec-10-3">10.3 安装ovs插件</a>
+<ul>
+<li><a href="#sec-10-3-1">10.3.1 安装</a></li>
+<li><a href="#sec-10-3-2">10.3.2 网络配置</a>
+<ul>
+<li><a href="#sec-10-3-2-1">10.3.2.1 建立网桥</a></li>
+<li><a href="#sec-10-3-2-2">10.3.2.2 编辑配置/etc/network/interfaces</a></li>
+<li><a href="#sec-10-3-2-3">10.3.2.3 重启网络</a></li>
+</ul>
+</li>
+<li><a href="#sec-10-3-3">10.3.3 编辑配置文件</a></li>
+</ul>
+</li>
+<li><a href="#sec-10-4">10.4 重启服务</a></li>
+</ul>
+</li>
+<li><a href="#sec-11">11 Orchestration Server(Heat)安装</a>
+<ul>
+<li><a href="#sec-11-1">11.1 安装</a></li>
+<li><a href="#sec-11-2">11.2 删除默认heat的sqlite db 文件</a></li>
+<li><a href="#sec-11-3">11.3 编辑配置文件</a></li>
+<li><a href="#sec-11-4">11.4 同步数据</a></li>
+<li><a href="#sec-11-5">11.5 创建用户和角色</a></li>
+<li><a href="#sec-11-6">11.6 创建服务和endpoint</a></li>
+<li><a href="#sec-11-7">11.7 重启服务</a></li>
+<li><a href="#sec-11-8">11.8 创建和管理stacks</a></li>
+</ul>
+</li>
+<li><a href="#sec-12">12 Metering/Monitoring Server（Ceilometer）安装</a>
+<ul>
+<li><a href="#sec-12-1">12.1 安装</a></li>
+<li><a href="#sec-12-2">12.2 创建数据库</a></li>
+<li><a href="#sec-12-3">12.3 修改配置文件</a></li>
+<li><a href="#sec-12-4">12.4 创建用户，角色，服务和endpoint</a></li>
+<li><a href="#sec-12-5">12.5 重启服务</a></li>
+</ul>
+</li>
+<li><a href="#sec-13">13 安装horizon</a></li>
+<li><a href="#sec-14">14 参考资料</a>
+<ul>
+<li><a href="#sec-14-1">14.1 heat</a></li>
+</ul>
+</li>
+<li><a href="#sec-15">15 安装及使用问题</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 修改记录</h2>
+<div class="outline-text-2" id="text-1">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">时间</th><th scope="col" class="left">内容</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">2014.01.07</td><td class="left">nova.conf和l3-agent firewall配置</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 部署环境</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>64位ubuntu-12.04.1-server系统 <br/>
+双网卡
+</p><ul>
+<li>外网eth0 192.168.60.108/24
+</li>
+<li>内网eth1 172.16.0.254/24
+</li>
+</ul>
+
+<p>双硬盘
+</p></div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 初始网卡配置</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>为eth0和eth1配置IP
+</p>
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">cat /etc/network/interfaces</span>
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+address 192.168.60.108
+netmask 255.255.255.0
+gateway 192.168.60.1
+dns-nameservers 8.8.8.8
+
+auto eth1
+iface eth1 inet static
+        address 172.16.0.254
+        netmask 255.255.255.0
+</pre>
+
+<p>
+重启网络
+</p>
+
+
+<pre class="src src-sh">/etc/init.d/networking restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 添加havana源</h2>
+<div class="outline-text-2" id="text-4">
+
+
+
+
+<pre class="src src-sh">apt-get install python-software-properties
+add-apt-repository cloud-archive:havana
+apt-get update &amp;&amp; apt-get dist-upgrade
+reboot
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 安装mysql和rabbitmq</h2>
+<div class="outline-text-2" id="text-5">
+
+
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#35774;&#32622;mysql root&#29992;&#25143;&#23494;&#30721;&#20026;123456</span>
+<span style="color: #859900;">echo</span> mysql-server-5.5 mysql-server/root_password password 123456 | debconf-set-selections
+<span style="color: #859900;">echo</span> mysql-server-5.5 mysql-server/root_password_again password 123456 | debconf-set-selections
+apt-get install mysql-server mysql-client python-mysqldb
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20801;&#35768;&#22806;&#37096;&#35775;&#38382;mysql</span>
+sed -i -e  <span style="color: #2aa198;">"s/^\(bind-address\s*=\).*/\1 0.0.0.0/"</span> /etc/mysql/my.cnf
+</pre>
+
+
+</div>
+
+<div id="outline-container-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> 创建数据库</h3>
+<div class="outline-text-3" id="text-5-1">
+
+<p>数据库名称为各组件名字，密码与数据库名相同。
+</p>
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36827;&#20837;mysql</span>
+mysql -u root -p123456
+CREATE DATABASE keystone;
+CREATE DATABASE glance;
+CREATE DATABASE nova;
+CREATE DATABASE cinder;
+CREATE DATABASE neutron;
+CREATE DATABASE heat;
+
+GRANT ALL PRIVILEGES ON keystone.* TO <span style="color: #2aa198;">'keystone'</span>@<span style="color: #2aa198;">'localhost'</span> IDENTIFIED BY <span style="color: #2aa198;">'keystone'</span>;
+GRANT ALL PRIVILEGES ON keystone.* TO <span style="color: #2aa198;">'keystone'</span>@<span style="color: #2aa198;">'%'</span> IDENTIFIED BY <span style="color: #2aa198;">'keystone'</span>;
+
+GRANT ALL PRIVILEGES ON glance.* TO <span style="color: #2aa198;">'glance'</span>@<span style="color: #2aa198;">'localhost'</span> IDENTIFIED BY <span style="color: #2aa198;">'glance'</span>;
+GRANT ALL PRIVILEGES ON glance.* TO <span style="color: #2aa198;">'glance'</span>@<span style="color: #2aa198;">'%'</span> IDENTIFIED BY <span style="color: #2aa198;">'glance'</span>;
+
+GRANT ALL PRIVILEGES ON nova.* TO <span style="color: #2aa198;">'nova'</span>@<span style="color: #2aa198;">'localhost'</span> IDENTIFIED BY <span style="color: #2aa198;">'nova'</span>;
+GRANT ALL PRIVILEGES ON nova.* TO <span style="color: #2aa198;">'nova'</span>@<span style="color: #2aa198;">'%'</span> IDENTIFIED BY <span style="color: #2aa198;">'nova'</span>;
+
+GRANT ALL PRIVILEGES ON cinder.* TO <span style="color: #2aa198;">'cinder'</span>@<span style="color: #2aa198;">'localhost'</span> IDENTIFIED BY <span style="color: #2aa198;">'cinder'</span>;
+GRANT ALL PRIVILEGES ON cinder.* TO <span style="color: #2aa198;">'cinder'</span>@<span style="color: #2aa198;">'%'</span> IDENTIFIED BY <span style="color: #2aa198;">'cinder'</span>;
+
+GRANT ALL PRIVILEGES ON neutron.* TO <span style="color: #2aa198;">'neutron'</span>@<span style="color: #2aa198;">'localhost'</span> IDENTIFIED BY <span style="color: #2aa198;">'neutron'</span>;
+GRANT ALL PRIVILEGES ON neutron.* TO <span style="color: #2aa198;">'neutron'</span>@<span style="color: #2aa198;">'%'</span> IDENTIFIED BY <span style="color: #2aa198;">'neutron'</span>;
+
+GRANT ALL PRIVILEGES ON heat.* TO <span style="color: #2aa198;">'heat'</span>@<span style="color: #2aa198;">'localhost'</span> IDENTIFIED BY <span style="color: #2aa198;">'heat'</span>;
+GRANT ALL PRIVILEGES ON heat.* TO <span style="color: #2aa198;">'heat'</span>@<span style="color: #2aa198;">'%'</span> IDENTIFIED BY <span style="color: #2aa198;">'heat'</span>;
+</pre>
+
+<p>
+#重启mysql服务
+</p>
+
+
+<pre class="src src-sh">/etc/init.d/mysql restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> 安装rabbitmq</h3>
+<div class="outline-text-3" id="text-5-2">
+
+
+
+
+<pre class="src src-sh">apt-get install rabbitmq-server
+</pre>
+
+<p>
+rabbitmq-server默认会创建一个用户，用户名密码均为guest，并允许任何人用guest用户和默认密码访问RabbitMQ server。
+如果需要可以修改guest密码,命令:
+</p>
+
+
+<pre class="src src-sh">rabbitmqctl change_password guest NEW_PASS
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 安装和配置Keystone</h2>
+<div class="outline-text-2" id="text-6">
+
+
+</div>
+
+<div id="outline-container-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> 安装</h3>
+<div class="outline-text-3" id="text-6-1">
+
+
+
+
+<pre class="src src-sh">apt-get install keystone
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-2" class="outline-3">
+<h3 id="sec-6-2"><span class="section-number-3">6.2</span> 删除默认keystone的sqlite db 文件</h3>
+<div class="outline-text-3" id="text-6-2">
+
+
+
+
+<pre class="src src-sh">rm -f /var/lib/keystone/keystone.db
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-3" class="outline-3">
+<h3 id="sec-6-3"><span class="section-number-3">6.3</span> 配置openssl</h3>
+<div class="outline-text-3" id="text-6-3">
+
+<p>在keystone与OpenStack服务之间如果要使用ssl进行token认证,就需要使用到openssl
+</p>
+
+
+<pre class="src src-sh">openssl rand -hex 10
+cdccc11cf024bd7de58e
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-4" class="outline-3">
+<h3 id="sec-6-4"><span class="section-number-3">6.4</span> 修改配置文件</h3>
+<div class="outline-text-3" id="text-6-4">
+
+
+</div>
+
+<div id="outline-container-6-4-1" class="outline-4">
+<h4 id="sec-6-4-1"><span class="section-number-4">6.4.1</span> 修改/etc/keystone/keystone.conf</h4>
+<div class="outline-text-4" id="text-6-4-1">
+
+<p>修改[DEFAULT]admin_token值， 修改[sql]的connection.
+</p>
+
+
+<pre class="src src-sh">[DEFAULT]
+admin_token = cdccc11cf024bd7de58e
+[sql]
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">The SQLAlchemy connection string used to connect to the database</span>
+connection = mysql://keystone:keystone@172.16.0.254/keystone
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-4-2" class="outline-4">
+<h4 id="sec-6-4-2"><span class="section-number-4">6.4.2</span> 同步keystone表数据到db中并重启keystone</h4>
+<div class="outline-text-4" id="text-6-4-2">
+
+
+
+
+<pre class="src src-sh">keystone-manage db_sync
+/etc/init.d/keystone restart
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-6-5" class="outline-3">
+<h3 id="sec-6-5"><span class="section-number-3">6.5</span> 创建tenant、user、roles</h3>
+<div class="outline-text-3" id="text-6-5">
+
+
+</div>
+
+<div id="outline-container-6-5-1" class="outline-4">
+<h4 id="sec-6-5-1"><span class="section-number-4">6.5.1</span> 首先创建两个环境变量</h4>
+<div class="outline-text-4" id="text-6-5-1">
+
+
+
+
+<pre class="src src-sh"><span style="color: #859900;">export</span> <span style="color: #268bd2;">OS_SERVICE_TOKEN</span>=cdccc11cf024bd7de58e
+<span style="color: #859900;">export</span> <span style="color: #268bd2;">OS_SERVICE_ENDPOINT</span>=http://172.16.0.254:35357/v2.0
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-5-2" class="outline-4">
+<h4 id="sec-6-5-2"><span class="section-number-4">6.5.2</span> 创建admin和service两个租户</h4>
+<div class="outline-text-4" id="text-6-5-2">
+
+
+
+
+<pre class="src src-sh">keystone tenant-create --name=admin --description=<span style="color: #2aa198;">"Admin Tenant"</span>
+keystone tenant-create --name=service --description=<span style="color: #2aa198;">"Service Tenant"</span>
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-5-3" class="outline-4">
+<h4 id="sec-6-5-3"><span class="section-number-4">6.5.3</span> 创建用户admin，密码password</h4>
+<div class="outline-text-4" id="text-6-5-3">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=admin --pass=password --email=admin@example.com
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-5-4" class="outline-4">
+<h4 id="sec-6-5-4"><span class="section-number-4">6.5.4</span> 创建角色admin</h4>
+<div class="outline-text-4" id="text-6-5-4">
+
+
+
+
+<pre class="src src-sh">keystone role-create --name=admin
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-5-5" class="outline-4">
+<h4 id="sec-6-5-5"><span class="section-number-4">6.5.5</span> 关联用户、角色、租户</h4>
+<div class="outline-text-4" id="text-6-5-5">
+
+
+
+
+<pre class="src src-sh">keystone user-role-add --user=admin --tenant=admin --role=admin
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-6-6" class="outline-3">
+<h3 id="sec-6-6"><span class="section-number-3">6.6</span> 创建Services 及 API endpoints</h3>
+<div class="outline-text-3" id="text-6-6">
+
+<p>首先创建一个类型为identity的keystone服务，名称为keystone：
+</p>
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">keystone_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=keystone --type=identity <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Keystone Identity Service"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+</pre>
+
+<p>
+创建endpoint
+</p>
+
+
+<pre class="src src-sh">keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">keystone_id</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:5000/v2.0 <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:5000/v2.0 <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:35357/v2.0
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-6-7" class="outline-3">
+<h3 id="sec-6-7"><span class="section-number-3">6.7</span> 验证认证服务(Keystone)安装是否成功</h3>
+<div class="outline-text-3" id="text-6-7">
+
+<p>先unset之前的环境变量：
+</p>
+
+
+<pre class="src src-sh"><span style="color: #859900;">unset</span> OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+</pre>
+
+<p>
+创建keystonerc文件(环境变量)
+</p>
+
+
+<pre class="src src-sh">cat &gt; /root/openrc.sh &lt;&lt; _EOF_
+<span style="color: #ffff00; font-weight: bold;">export OS_USERNAME=admin</span>
+<span style="color: #ffff00; font-weight: bold;">export OS_PASSWORD=password</span>
+<span style="color: #ffff00; font-weight: bold;">export OS_TENANT_NAME=admin</span>
+<span style="color: #ffff00; font-weight: bold;">export OS_AUTH_URL=http://172.16.0.254:35357/v2.0</span>
+<span style="color: #ffff00; font-weight: bold;">_EOF_</span>
+<span style="color: #859900;">echo</span> <span style="color: #2aa198;">'source /root/openrc.sh'</span> &gt;&gt; /root/.bashrc
+<span style="color: #859900;">source</span> /root/openrc.sh
+</pre>
+
+<p>
+验证keystone是否正常
+</p>
+
+
+<pre class="src src-sh">keystone token-get
+keystone user-list
+keystone role-list
+keystone tenant-list
+keystone endpoint-list
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 安装和配置glance</h2>
+<div class="outline-text-2" id="text-7">
+
+
+</div>
+
+<div id="outline-container-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> 安装</h3>
+<div class="outline-text-3" id="text-7-1">
+
+
+
+
+<pre class="src src-sh">apt-get install glance python-glanceclient sheepdog
+</pre>
+
+<p>
+删除 glance sqlite 文件：
+</p>
+
+
+<pre class="src src-sh">rm -f /var/lib/glance/glance.sqlite
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> 修改glance配置文件</h3>
+<div class="outline-text-3" id="text-7-2">
+
+<p>修改/etc/glance/glance-api.conf
+</p>
+
+
+<pre class="src src-sh">verbose = True
+debug = True
+sql_connection = mysql://glance:glance@172.16.0.254/glance
+
+notifier_strategy = rabbit
+rabbit_host = 172.16.0.254
+rabbit_password = guest
+
+[keystone_authtoken]
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = glance
+admin_password = glance
+</pre>
+
+<p>
+修改/etc/glance/glance-registry.conf
+</p>
+
+
+<pre class="src src-sh">verbose = True
+debug = True
+sql_connection = mysql://glance:glance@172.16.0.254/glance
+[keystone_authtoken]
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = glance
+admin_password = glance
+</pre>
+
+<p>
+/etc/glance/glance-api-paste.ini
+</p>
+
+
+<pre class="src src-sh">[filter:authtoken]
+paste.filter_factory=keystoneclient.middleware.auth_token:filter_factory
+<span style="color: #268bd2;">auth_host</span>=172.16.0.254
+<span style="color: #268bd2;">admin_user</span>=glance
+<span style="color: #268bd2;">admin_tenant_name</span>=service
+<span style="color: #268bd2;">admin_password</span>=glance
+<span style="color: #268bd2;">flavor</span>=keystone
+</pre>
+
+<p>
+/etc/glance/glance-registry-paste.ini
+</p>
+
+
+<pre class="src src-sh">[filter:authtoken]
+paste.filter_factory=keystoneclient.middleware.auth_token:filter_factory
+<span style="color: #268bd2;">auth_host</span>=172.16.0.254
+<span style="color: #268bd2;">admin_user</span>=glance
+<span style="color: #268bd2;">admin_tenant_name</span>=service
+<span style="color: #268bd2;">admin_password</span>=glance
+<span style="color: #268bd2;">flavor</span>=keystone
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-3" class="outline-3">
+<h3 id="sec-7-3"><span class="section-number-3">7.3</span> 同步数据库</h3>
+<div class="outline-text-3" id="text-7-3">
+
+
+
+
+<pre class="src src-sh">glance-manage db_sync
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-4" class="outline-3">
+<h3 id="sec-7-4"><span class="section-number-3">7.4</span> 创建名为glance的认证用户</h3>
+<div class="outline-text-3" id="text-7-4">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=glance --pass=glance --email=glance@example.com
+keystone user-role-add --user=glance --tenant=service --role=admin
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-5" class="outline-3">
+<h3 id="sec-7-5"><span class="section-number-3">7.5</span> 创建service服务和endpoint</h3>
+<div class="outline-text-3" id="text-7-5">
+
+
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">glance_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=glance --type=image <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Glance Image Service"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">glance_id</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:9292 <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:9292 <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:9292
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-6" class="outline-3">
+<h3 id="sec-7-6"><span class="section-number-3">7.6</span> 重启glance服务</h3>
+<div class="outline-text-3" id="text-7-6">
+
+
+
+
+<pre class="src src-sh">service glance-registry restart
+service glance-api restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-7-7" class="outline-3">
+<h3 id="sec-7-7"><span class="section-number-3">7.7</span> 上传镜像</h3>
+<div class="outline-text-3" id="text-7-7">
+
+<p>下载测试镜像
+</p>
+
+
+<pre class="src src-sh">wget http://cdn.download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img
+</pre>
+
+<p>
+上传
+</p>
+
+
+<pre class="src src-sh">glance image-create --name=<span style="color: #2aa198;">'cirros'</span> --is-public true --container-format bare --disk-format qcow2 &lt; ./cirros-0.3.0-x86_64-disk.img
+</pre>
+
+<p>
+查看上传的镜像
+</p>
+
+
+<pre class="src src-sh">glance image-list
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 安装和配置nova</h2>
+<div class="outline-text-2" id="text-8">
+
+
+</div>
+
+<div id="outline-container-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> 安装计算服务</h3>
+<div class="outline-text-3" id="text-8-1">
+
+
+
+
+<pre class="src src-sh">apt-get install nova-novncproxy novnc nova-api python-novaclient <span style="color: #2aa198;">\</span>
+nova-ajax-console-proxy nova-cert nova-conductor <span style="color: #2aa198;">\</span>
+nova-consoleauth nova-doc nova-scheduler
+apt-get install nova-compute-kvm python-guestfs
+</pre>
+
+<p>
+安装过程会提示你,选择”yes”即可。
+</p></div>
+
+</div>
+
+<div id="outline-container-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> 修复guestfs的一个bug</h3>
+<div class="outline-text-3" id="text-8-2">
+
+
+
+
+<pre class="src src-sh">chmod 0644 /boot/vmlinuz*
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-3" class="outline-3">
+<h3 id="sec-8-3"><span class="section-number-3">8.3</span> 删除默认nova的sqlite db文件</h3>
+<div class="outline-text-3" id="text-8-3">
+
+
+
+
+<pre class="src src-sh">rm -f /var/lib/nova/nova.sqlite
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-4" class="outline-3">
+<h3 id="sec-8-4"><span class="section-number-3">8.4</span> 修改配置文件</h3>
+<div class="outline-text-3" id="text-8-4">
+
+<p>修改/etc/nova/nova.conf，原有基础上添加
+</p>
+
+
+<pre class="src src-sh">[DEFAULT]
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">vnc</span>
+<span style="color: #268bd2;">my_ip</span>=172.16.0.254
+<span style="color: #268bd2;">vnc_enabled</span>=True
+<span style="color: #268bd2;">vncserver_listen</span>=0.0.0.0
+<span style="color: #268bd2;">vncserver_proxyclient_address</span>=172.16.0.254
+<span style="color: #268bd2;">novncproxy_base_url</span>=http://192.168.60.108:6080/vnc_auto.html
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">Messaging</span>
+rpc_backend = nova.rpc.impl_kombu
+rabbit_host = 172.16.0.254
+rabbit_password = guest
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">Glance</span>
+glance_host = 172.16.0.254
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">Auth</span>
+<span style="color: #268bd2;">auth_strategy</span>=keystone
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">Nova Metadata</span>
+neutron_metadata_proxy_shared_secret = cdccc11cf024bd7de58e
+service_neutron_metadata_proxy = true
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">Ceilometer</span>
+<span style="color: #268bd2;">instance_usage_audit</span>=True
+<span style="color: #268bd2;">instance_usage_audit_period</span>=hour
+<span style="color: #268bd2;">notify_on_state_change</span>=vm_and_task_state
+<span style="color: #268bd2;">notification_driver</span>=nova.openstack.common.notifier.rpc_notifier
+<span style="color: #268bd2;">notification_driver</span>=ceilometer.compute.nova_notifier
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">neutron</span>
+<span style="color: #268bd2;">network_api_class</span>=nova.network.neutronv2.api.API
+<span style="color: #268bd2;">neutron_url</span>=http://172.16.0.254:9696
+<span style="color: #268bd2;">neutron_auth_strategy</span>=keystone
+<span style="color: #268bd2;">neutron_admin_tenant_name</span>=service
+<span style="color: #268bd2;">neutron_admin_username</span>=neutron
+<span style="color: #268bd2;">neutron_admin_password</span>=neutron
+<span style="color: #268bd2;">neutron_admin_auth_url</span>=http://172.16.0.254:35357/v2.0
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#22914;&#26524;&#27809;&#26377;libvirt_vif_driver&#23558;&#19981;&#20250;&#26377;qvb&#31561;&#35774;&#22791;</span>
+libvirt_vif_driver = nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">firewall_driver=nova.virt.firewall.NoopFirewallDriver</span>
+<span style="color: #268bd2;">firewall_driver</span>=nova.virt.libvirt.firewall.IptablesFirewallDriver
+<span style="color: #268bd2;">security_group_api</span>=neutron
+
+[database]
+connection = mysql://nova:nova@172.16.0.254/nova
+
+[keystone_authtoken]
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+
+</pre>
+
+<p>
+修改/etc/nova/api-paste.ini的[filter:authtoken]部分
+</p>
+
+
+<pre class="src src-sh">[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://172.16.0.254:5000/v2.0
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-5" class="outline-3">
+<h3 id="sec-8-5"><span class="section-number-3">8.5</span> 创建用户与角色</h3>
+<div class="outline-text-3" id="text-8-5">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=nova --pass=nova --email=nova@example.com
+keystone user-role-add --user=nova --tenant=service --role=admin
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-6" class="outline-3">
+<h3 id="sec-8-6"><span class="section-number-3">8.6</span> 创建service服务和endpoint</h3>
+<div class="outline-text-3" id="text-8-6">
+
+
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">nova_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=nova --type=compute <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Nova Compute service"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">nova_id</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:8774/v2/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:8774/v2/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:8774/v2/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8-7" class="outline-3">
+<h3 id="sec-8-7"><span class="section-number-3">8.7</span> 重启nova服务</h3>
+<div class="outline-text-3" id="text-8-7">
+
+<p>同步数据
+</p>
+
+
+<pre class="src src-sh">nova-manage db sync
+</pre>
+
+<p>
+重启服务
+</p>
+
+
+<pre class="src src-sh"><span style="color: #859900;">cd</span> /etc/init.d/; <span style="color: #859900;">for</span> i<span style="color: #859900;"> in</span> $( ls nova-* ); <span style="color: #859900;">do</span> sudo service $<span style="color: #268bd2;">i</span> restart; <span style="color: #859900;">done</span>
+</pre>
+
+<p>
+#查看服务状态
+</p>
+
+
+<pre class="src src-sh">nova-manage service list
+Binary           Host                                 Zone             Status     State Updated_At
+nova-cert        ubuntu                               internal         enabled    :-)   2013-12-24 05:39:29
+nova-conductor   ubuntu                               internal         enabled    :-)   2013-12-24 05:39:27
+nova-consoleauth ubuntu                               internal         enabled    :-)   2013-12-24 05:39:30
+nova-compute     ubuntu                               nova             enabled    :-)   2013-12-24 05:39:27
+nova-scheduler   ubuntu                               internal         enabled    :-)   2013-12-24 05:39:30
+</pre>
+
+<p>
+应该看到5个:)
+</p>
+<p>
+测试nova是否安装正常
+</p>
+
+
+<pre class="src src-sh">nova image-list
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Block Storage (Cinder)安装</h2>
+<div class="outline-text-2" id="text-9">
+
+
+</div>
+
+<div id="outline-container-9-1" class="outline-3">
+<h3 id="sec-9-1"><span class="section-number-3">9.1</span> 安装服务</h3>
+<div class="outline-text-3" id="text-9-1">
+
+
+
+
+<pre class="src src-sh">apt-get install cinder-api cinder-scheduler
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-2" class="outline-3">
+<h3 id="sec-9-2"><span class="section-number-3">9.2</span> 建立一个逻辑卷卷组 cinder-volumes</h3>
+<div class="outline-text-3" id="text-9-2">
+
+<p>创建一个普通分区，我这里用的sdb，创建了一个主分区，大小为所有空间
+</p>
+
+
+<pre class="src src-sh">apt-get install cinder-volume lvm2
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">fdisk /dev/sdb</span>
+n
+p
+1
+Enter
+Enter
+t
+8e
+w
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">pvcreate /dev/sdb1</span>
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">vgcreate cinder-volumes /dev/sdb1</span>
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">vgs</span>
+  VG             <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">PV #LV #SN Attr   VSize  VFree</span><span style="background-color: #ffd700;"> </span>
+  cinder-volumes   1   0   0 wz--n- 10.00g 10.00g
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-3" class="outline-3">
+<h3 id="sec-9-3"><span class="section-number-3">9.3</span> 修改配置文件</h3>
+<div class="outline-text-3" id="text-9-3">
+
+<p>/etc/cinder/cinder.conf，添加
+</p>
+
+
+<pre class="src src-sh">sql_connection = mysql://cinder:cinder@172.16.0.254/cinder
+
+rpc_backend = cinder.openstack.common.rpc.impl_kombu
+rabbit_host = 172.16.0.254
+rabbit_port = 5672
+rabbit_userid = guest
+rabbit_password = guest
+
+control_exchange = cinder
+notification_driver = cinder.openstack.common.notifier.rpc_notifier
+</pre>
+
+<p>
+/etc/cinder/api-paste.ini
+</p>
+
+
+<pre class="src src-sh">[filter:authtoken]
+paste.filter_factory=keystoneclient.middleware.auth_token:filter_factory
+<span style="color: #268bd2;">auth_host</span>=172.16.0.254
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = cinder
+admin_password = cinder
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-4" class="outline-3">
+<h3 id="sec-9-4"><span class="section-number-3">9.4</span> 创建用户，角色，服务和endpoint</h3>
+<div class="outline-text-3" id="text-9-4">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=cinder --pass=cinder --email=cinder@example.com
+keystone user-role-add --user=cinder --tenant=service --role=admin
+
+<span style="color: #268bd2;">cinder_id1</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=cinder --type=volume <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Cinder Volume Service"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">cinder_id1</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:8776/v1/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:8776/v1/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:8776/v1/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s
+
+<span style="color: #268bd2;">cinder_id2</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=cinder --type=volumev2 <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Cinder Volume Service V2"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">cinder_id2</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:8776/v2/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:8776/v2/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:8776/v2/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-5" class="outline-3">
+<h3 id="sec-9-5"><span class="section-number-3">9.5</span> 同步数据并重启服务</h3>
+<div class="outline-text-3" id="text-9-5">
+
+
+
+
+<pre class="src src-sh">cinder-manage db sync
+service cinder-scheduler restart
+service cinder-api restart
+service cinder-volume restart
+service tgt restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9-6" class="outline-3">
+<h3 id="sec-9-6"><span class="section-number-3">9.6</span> 检查</h3>
+<div class="outline-text-3" id="text-9-6">
+
+
+
+
+<pre class="src src-sh">cinder list <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26080;&#36755;&#20986;</span>
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> 安装和配置neutron</h2>
+<div class="outline-text-2" id="text-10">
+
+
+</div>
+
+<div id="outline-container-10-1" class="outline-3">
+<h3 id="sec-10-1"><span class="section-number-3">10.1</span> 创建用户，服务和endpoint</h3>
+<div class="outline-text-3" id="text-10-1">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=neutron --pass=neutron --email=neutron@example.com
+keystone user-role-add --user=neutron --tenant=service --role=admin
+
+<span style="color: #268bd2;">neutron_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=neutron --type=network <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"OpenStack Networking Service"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id $<span style="color: #268bd2;">neutron_id</span> <span style="color: #2aa198;">\</span>
+--publicurl http://172.16.0.254:9696 <span style="color: #2aa198;">\</span>
+--adminurl http://172.16.0.254:9696 <span style="color: #2aa198;">\</span>
+--internalurl http://172.16.0.254:9696
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10-2" class="outline-3">
+<h3 id="sec-10-2"><span class="section-number-3">10.2</span> 安装网络服务</h3>
+<div class="outline-text-3" id="text-10-2">
+
+
+</div>
+
+<div id="outline-container-10-2-1" class="outline-4">
+<h4 id="sec-10-2-1"><span class="section-number-4">10.2.1</span> 安装neutron组件</h4>
+<div class="outline-text-4" id="text-10-2-1">
+
+
+
+
+<pre class="src src-sh">apt-get install neutron-server neutron-dhcp-agent  neutron-l3-agent neutron-lbaas-agent
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10-2-2" class="outline-4">
+<h4 id="sec-10-2-2"><span class="section-number-4">10.2.2</span> 打开ip_forward</h4>
+<div class="outline-text-4" id="text-10-2-2">
+
+<p>编辑/etc/sysctl.conf
+</p>
+
+
+<pre class="src src-sh">net.ipv4.ip_forward=1
+net.ipv4.conf.all.rp_filter=0
+net.ipv4.conf.default.rp_filter=0
+</pre>
+
+<p>
+重启网络
+</p>
+
+
+<pre class="src src-sh">sysctl -p
+/etc/init.d/networking restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10-2-3" class="outline-4">
+<h4 id="sec-10-2-3"><span class="section-number-4">10.2.3</span> 编辑配置文件</h4>
+<div class="outline-text-4" id="text-10-2-3">
+
+<p>编辑/etc/neutron/neutron.conf 
+</p>
+
+
+<pre class="src src-sh">[DEFAULT]
+debug = True
+verbose = True
+allow_overlapping_ips = True
+
+core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
+service_plugins = neutron.plugins.services.agent_loadbalancer.plugin.LoadBalancerPlugin
+service_plugins = neutron.services.firewall.fwaas_plugin.FirewallPlugin
+
+api_paste_config = /etc/neutron/api-paste.ini
+
+auth_strategy = keystone
+
+rpc_backend = neutron.openstack.common.rpc.impl_kombu
+rabbit_host = 172.16.0.254
+rabbit_port = 5672
+rabbit_userid = guest
+rabbit_password = guest
+
+[keystone_authtoken]
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+auth_url = http://172.16.0.254:35357/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+
+[database]
+connection = mysql://neutron:neutron@172.16.0.254/neutron
+</pre>
+
+<p>
+编辑/etc/neutron/api-paste.ini
+</p>
+
+
+<pre class="src src-sh">[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+<span style="color: #268bd2;">auth_host</span>=172.16.0.254
+<span style="color: #268bd2;">auth_uri</span>=http://172.16.0.254:5000
+<span style="color: #268bd2;">admin_user</span>=neutron
+<span style="color: #268bd2;">admin_tenant_name</span>=service
+<span style="color: #268bd2;">admin_password</span>=neutron
+</pre>
+
+<p>
+编辑/etc/neutron/dhcp_agent.ini
+</p>
+
+
+<pre class="src src-sh">dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+use_namespaces = True
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+</pre>
+
+<p>
+编辑/etc/neutron/l3_agent.ini
+</p>
+
+
+<pre class="src src-sh">auth_url = http://172.16.0.254:35357/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+metadata_ip = 172.16.0.254
+use_namespaces = True
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+</pre>
+
+<p>
+编辑/etc/neutron/metadata_agent.ini
+</p>
+
+
+<pre class="src src-sh">[DEFAULT]
+auth_url = http://172.16.0.254:5000/v2.0
+auth_region = regionOne
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+nova_metadata_ip = 172.16.0.254
+metadata_proxy_shared_secret = cdccc11cf024bd7de58e
+</pre>
+
+<p>
+编辑/etc/neutron/lbaas_agent.ini
+</p>
+
+
+<pre class="src src-sh">interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+device_driver = neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver
+</pre>
+
+<p>
+创建/etc/neutron/fwaas_driver.ini
+</p>
+
+
+<pre class="src src-sh">[fwaas]
+driver = neutron.services.firewall.drivers.linux.iptables_fwaas.IptablesFwaasDriver
+enabled = True
+</pre>
+
+<p>
+编辑/etc/init/neutron-l3-agent 补充&ndash;config file fwaas_driver.ini
+</p>
+
+
+<pre class="src src-sh"><span style="color: #859900;">exec</span> start-stop-daemon --start --chuid neutron --exec /usr/bin/neutron-l3-agent -- --config-file=/etc/neutron/neutron.conf --config-file=/etc/neutron/l3_agent.ini --config-file /etc/neutron/fwaas_driver.ini --log-file=/var/log/neutron/l3-agent.log
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-10-3" class="outline-3">
+<h3 id="sec-10-3"><span class="section-number-3">10.3</span> 安装ovs插件</h3>
+<div class="outline-text-3" id="text-10-3">
+
+
+</div>
+
+<div id="outline-container-10-3-1" class="outline-4">
+<h4 id="sec-10-3-1"><span class="section-number-4">10.3.1</span> 安装</h4>
+<div class="outline-text-4" id="text-10-3-1">
+
+
+
+
+<pre class="src src-sh">apt-get install openvswitch-datapath-dkms openvswitch-switch neutron-plugin-openvswitch-agent
+service openvswitch-switch restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10-3-2" class="outline-4">
+<h4 id="sec-10-3-2"><span class="section-number-4">10.3.2</span> 网络配置</h4>
+<div class="outline-text-4" id="text-10-3-2">
+
+
+</div>
+
+<div id="outline-container-10-3-2-1" class="outline-5">
+<h5 id="sec-10-3-2-1"><span class="section-number-5">10.3.2.1</span> 建立网桥</h5>
+<div class="outline-text-5" id="text-10-3-2-1">
+
+
+
+
+<pre class="src src-sh">ovs-vsctl add-br br-int
+ovs-vsctl add-br br-ex
+ovs-vsctl add-port br-ex eth0
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10-3-2-2" class="outline-5">
+<h5 id="sec-10-3-2-2"><span class="section-number-5">10.3.2.2</span> 编辑配置/etc/network/interfaces</h5>
+<div class="outline-text-5" id="text-10-3-2-2">
+
+
+
+
+<pre class="src src-sh">auto lo
+iface lo inet loopback
+
+auto eth1
+iface eth0 inet static
+        address 172.16.0.254
+        netmask 255.255.255.0
+
+auto eth0
+iface eth0 inet manual
+        up ifconfig $<span style="color: #268bd2;">IFACE</span> 0.0.0.0 up
+        down ifconfig $<span style="color: #268bd2;">IFACE</span> down
+
+auto br-ex
+iface br-ex inet static
+        address 192.168.60.108
+        netmask 255.255.255.0
+        gateway 192.168.60.1
+        dns-nameservers 8.8.8.8
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-10-3-2-3" class="outline-5">
+<h5 id="sec-10-3-2-3"><span class="section-number-5">10.3.2.3</span> 重启网络</h5>
+<div class="outline-text-5" id="text-10-3-2-3">
+
+
+
+
+<pre class="src src-sh">ifconfig eth0 0
+/etc/init.d/networking restart
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-10-3-3" class="outline-4">
+<h4 id="sec-10-3-3"><span class="section-number-4">10.3.3</span> 编辑配置文件</h4>
+<div class="outline-text-4" id="text-10-3-3">
+
+<p>编辑/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+</p>
+
+
+<pre class="src src-sh">[securitygroup]
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">Firewall driver for realizing neutron security group function.</span>
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+[ovs]
+tenant_network_type = gre
+tunnel_id_ranges = 1:1000
+enable_tunneling = True
+integration_bridge = br-int
+tunnel_bridge = br-tun
+local_ip = 172.16.0.254
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-10-4" class="outline-3">
+<h3 id="sec-10-4"><span class="section-number-3">10.4</span> 重启服务</h3>
+<div class="outline-text-3" id="text-10-4">
+
+
+
+
+<pre class="src src-sh"><span style="color: #859900;">cd</span> /etc/init.d/; <span style="color: #859900;">for</span> i<span style="color: #859900;"> in</span> $( ls neutron-* ); <span style="color: #859900;">do</span> sudo service $<span style="color: #268bd2;">i</span> restart; <span style="color: #859900;">done</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26597;&#30475;&#26381;&#21153;&#29366;&#24577;</span>
+neutron agent-list
++--------------------------------------+--------------------+--------+-------+----------------+
+| id                                   | agent_type         | host   | alive | admin_state_up |
++--------------------------------------+--------------------+--------+-------+----------------+
+| 6cc3719f-7c43-41c7-bc19-9839a362c321 | Open vSwitch agent | ubuntu | :-)   | True           |
+| d96922b7-64a3-44f7-831f-1e9ea2033a33 | L3 agent           | ubuntu | :-)   | True           |
+| ea701f27-1821-4134-9e6f-02acc8678e85 | DHCP agent         | ubuntu | :-)   | True           |
++--------------------------------------+--------------------+--------+-------+----------------+
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-11" class="outline-2">
+<h2 id="sec-11"><span class="section-number-2">11</span> Orchestration Server(Heat)安装</h2>
+<div class="outline-text-2" id="text-11">
+
+
+</div>
+
+<div id="outline-container-11-1" class="outline-3">
+<h3 id="sec-11-1"><span class="section-number-3">11.1</span> 安装</h3>
+<div class="outline-text-3" id="text-11-1">
+
+
+
+
+<pre class="src src-sh">apt-get install heat-api heat-api-cfn heat-engine heat-api-cloudwatch
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-2" class="outline-3">
+<h3 id="sec-11-2"><span class="section-number-3">11.2</span> 删除默认heat的sqlite db 文件</h3>
+<div class="outline-text-3" id="text-11-2">
+
+
+
+
+<pre class="src src-sh">rm -f /var/lib/heat/heat.sqlite
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-3" class="outline-3">
+<h3 id="sec-11-3"><span class="section-number-3">11.3</span> 编辑配置文件</h3>
+<div class="outline-text-3" id="text-11-3">
+
+<p>/etc/heat/heat.conf
+</p>
+
+
+<pre class="src src-sh">verbose = True
+<span style="color: #268bd2;">log_dir</span>=/var/log/heat
+rabbit_host = 172.16.0.254
+rabbit_password = guest
+
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">The SQLAlchemy connection string used to connect to the database</span>
+sql_connection = mysql://heat:heat@172.16.0.254/heat
+
+[keystone_authtoken]
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://172.16.0.254:5000/v2.0
+admin_tenant_name = service
+admin_user = heat
+admin_password = heat
+[ec2_authtoken]
+auth_uri = http://172.16.0.254:5000/v2.0
+keystone_ec2_uri = http://172.16.0.254:5000/v2.0/ec2tokens
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-4" class="outline-3">
+<h3 id="sec-11-4"><span class="section-number-3">11.4</span> 同步数据</h3>
+<div class="outline-text-3" id="text-11-4">
+
+
+
+
+<pre class="src src-sh">heat-manage db_sync
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-5" class="outline-3">
+<h3 id="sec-11-5"><span class="section-number-3">11.5</span> 创建用户和角色</h3>
+<div class="outline-text-3" id="text-11-5">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=heat --pass=heat --email=heat@example.com
+keystone user-role-add --user=heat --tenant=service --role=admin
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-6" class="outline-3">
+<h3 id="sec-11-6"><span class="section-number-3">11.6</span> 创建服务和endpoint</h3>
+<div class="outline-text-3" id="text-11-6">
+
+
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">heat_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=heat --type=orchestration <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Heat Orchestration API"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">heat_id</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:8004/v1/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:8004/v1/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:8004/v1/%<span style="color: #2aa198;">\(</span>tenant_id<span style="color: #2aa198;">\)</span>s
+
+<span style="color: #268bd2;">heat_cfn_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=heat-cfn --type=cloudformation <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Heat CloudFormation API"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">heat_cfn_id</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:8000/v1 <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:8000/v1 <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.0.254:8000/v1
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-7" class="outline-3">
+<h3 id="sec-11-7"><span class="section-number-3">11.7</span> 重启服务</h3>
+<div class="outline-text-3" id="text-11-7">
+
+
+
+
+<pre class="src src-sh"><span style="color: #859900;">cd</span> /etc/init.d/; <span style="color: #859900;">for</span> i<span style="color: #859900;"> in</span> $( ls heat-* ); <span style="color: #859900;">do</span> sudo service $<span style="color: #268bd2;">i</span> restart; <span style="color: #859900;">done</span>
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-11-8" class="outline-3">
+<h3 id="sec-11-8"><span class="section-number-3">11.8</span> 创建和管理stacks</h3>
+<div class="outline-text-3" id="text-11-8">
+
+
+
+
+<pre class="src src-sh">wget https://raw.github.com/openstack/heat-templates/master/cfn/F17/WordPress_Composed_Instances.template
+glance image-create --name F17-x86_64-cfntools --disk-format qcow2 --container-format bare --is-public True --copy-from http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F17-x86_64-cfntools.qcow2
+nova keypair-add heat_key &gt; heat_key.priv
+chmod 600 heat_key.priv
+heat stack-create wordpress --template-file=WordPress_Composed_Instances.template --parameters=<span style="color: #2aa198;">"DBUsername=wp;DBPassword=wp;KeyName=userkey;LinuxDistribution=F17"</span>
+heat stack-list
+</pre>
+
+<p>
+PS:对heat还没有研究，创建stack是网上找的
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-12" class="outline-2">
+<h2 id="sec-12"><span class="section-number-2">12</span> Metering/Monitoring Server（Ceilometer）安装</h2>
+<div class="outline-text-2" id="text-12">
+
+
+</div>
+
+<div id="outline-container-12-1" class="outline-3">
+<h3 id="sec-12-1"><span class="section-number-3">12.1</span> 安装</h3>
+<div class="outline-text-3" id="text-12-1">
+
+<p>安装服务
+</p>
+
+
+<pre class="src src-sh">apt-get install ceilometer-api ceilometer-collector ceilometer-agent-central python-ceilometerclient ceilometer-agent-compute
+</pre>
+
+<p>
+安装MongoDB Orchestration 服务使用数据库来存储信息，此示例使用MongoDB数据库
+</p>
+
+
+<pre class="src src-sh">apt-get install mongodb
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-12-2" class="outline-3">
+<h3 id="sec-12-2"><span class="section-number-3">12.2</span> 创建数据库</h3>
+<div class="outline-text-3" id="text-12-2">
+
+<p>运行mongo命令如果报错couldn't connect to server 127.0.0.1:27017 at src/mongo/shell/mongo.js:145
+</p>
+
+
+<pre class="src src-sh">mongod --repair
+service mongodb restart
+</pre>
+
+
+<pre class="src src-sh">mongo
+&gt; use ceilometer
+&gt; db.addUser( { user: <span style="color: #2aa198;">"ceilometer"</span>,
+<span style="color: #859900;">pwd</span>: <span style="color: #2aa198;">"ceilometer"</span>,
+roles: [ <span style="color: #2aa198;">"readWrite"</span>, <span style="color: #2aa198;">"dbAdmin"</span> ]
+} )
+</pre>
+
+<p>
+编辑/etc/mongodb.conf
+</p>
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">bind_ip</span>=0.0.0.0
+</pre>
+
+<p>
+重启数据库
+</p>
+
+
+<pre class="src src-sh">service mongodb restart
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-12-3" class="outline-3">
+<h3 id="sec-12-3"><span class="section-number-3">12.3</span> 修改配置文件</h3>
+<div class="outline-text-3" id="text-12-3">
+
+<p>修改/etc/ceilometer/ceilometer.conf
+</p>
+
+
+<pre class="src src-sh">[DEFAULT]
+<span style="color: #268bd2;">http_control_exchanges</span>=nova
+<span style="color: #268bd2;">http_control_exchanges</span>=glance
+<span style="color: #268bd2;">http_control_exchanges</span>=neutron
+<span style="color: #268bd2;">http_control_exchanges</span>=cinder
+<span style="color: #268bd2;">auth_strategy</span>=keystone
+<span style="color: #268bd2;">nova_control_exchange</span>=nova
+<span style="color: #268bd2;">glance_control_exchange</span>=glance
+<span style="color: #268bd2;">neutron_control_exchange</span>=neutron
+<span style="color: #268bd2;">lock_path</span>= /var/lock/ceilometer
+state_path = /var/lib/ceilometer
+<span style="color: #268bd2;">debug</span>=True
+<span style="color: #268bd2;">verbose</span>= True
+<span style="color: #268bd2;">log_file</span>= ceilometer.log
+<span style="color: #268bd2;">log_dir</span>= /var/log/ceilometer
+<span style="color: #268bd2;">notification_driver</span>=ceilometer.openstack.common.notifier.rabbit_notifier
+<span style="color: #268bd2;">default_notification_level</span>=INFO
+<span style="color: #268bd2;">notification_topics</span>=notifications
+<span style="color: #268bd2;">policy_file</span>=policy.json
+<span style="color: #268bd2;">rpc_backend</span>=ceilometer.openstack.common.rpc.impl_kombu
+<span style="color: #268bd2;">control_exchange</span>=ceilometer
+<span style="color: #268bd2;">rabbit_host</span>=172.16.0.254<span style="background-color: #ffd700;"> </span>
+<span style="color: #268bd2;">rabbit_port</span>=5672
+<span style="color: #268bd2;">rabbit_userid</span>=guest
+<span style="color: #268bd2;">rabbit_password</span>=guest
+<span style="color: #268bd2;">database_connection</span>= mongodb://ceilometer:ceilometer@172.16.0.254:27017/ceilometer
+<span style="color: #268bd2;">cinder_control_exchange</span>=cinder
+[publisher_rpc]
+<span style="color: #268bd2;">metering_secret</span>=cdccc11cf024bd7de58e
+[ssl]
+[database]
+[alarm]
+[rpc_notifier2]
+[api]
+[service_credentials]
+<span style="color: #268bd2;">os_username</span>=ceilometer
+<span style="color: #268bd2;">os_password</span>=ceilometer
+<span style="color: #268bd2;">os_tenant_name</span>=service
+<span style="color: #268bd2;">os_auth_url</span>=http://172.16.0.254:5000/v2.0
+[dispatcher_file]
+[keystone_authtoken]
+auth_host = 172.16.0.254
+auth_port = 35357
+auth_protocol = http
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36825;&#37324;&#20889;service,horizon&#26080;&#27861;&#21152;&#36733;ceilometer&#30340;&#20449;&#24687;</span>
+admin_tenant_name = admin
+admin_user = admin
+admin_password = password
+auth_url = http://172.16.0.254:5000
+[collector]
+[matchmaker_ring]
+[matchmaker_redis]
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-12-4" class="outline-3">
+<h3 id="sec-12-4"><span class="section-number-3">12.4</span> 创建用户，角色，服务和endpoint</h3>
+<div class="outline-text-3" id="text-12-4">
+
+
+
+
+<pre class="src src-sh">keystone user-create --name=ceilometer --pass=CEILOMETER_PASS --email=ceilometer@example.com
+keystone user-role-add --user=ceilometer --tenant=service --role=admin
+
+<span style="color: #268bd2;">ceilometer_id</span>=$(<span style="color: #fa8072;">keystone</span> service-create --name=ceilometer --type=metering <span style="color: #2aa198;">\</span>
+--description=<span style="color: #2aa198;">"Ceilometer Metering Service"</span> | awk <span style="color: #2aa198;">'/ id / { print $4 }'</span>)
+keystone endpoint-create <span style="color: #2aa198;">\</span>
+--service-id=$<span style="color: #268bd2;">ceilometer_id</span> <span style="color: #2aa198;">\</span>
+--publicurl=http://172.16.0.254:8777/ <span style="color: #2aa198;">\</span>
+--internalurl=http://172.16.0.254:8777/ <span style="color: #2aa198;">\</span>
+--adminurl=http://172.16.254:8777/
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-12-5" class="outline-3">
+<h3 id="sec-12-5"><span class="section-number-3">12.5</span> 重启服务</h3>
+<div class="outline-text-3" id="text-12-5">
+
+
+
+
+<pre class="src src-sh"><span style="color: #859900;">cd</span> /etc/init.d/; <span style="color: #859900;">for</span> i<span style="color: #859900;"> in</span> $( ls ceilometer-* ); <span style="color: #859900;">do</span> sudo service $<span style="color: #268bd2;">i</span> restart; <span style="color: #859900;">done</span>
+</pre>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-13" class="outline-2">
+<h2 id="sec-13"><span class="section-number-2">13</span> 安装horizon</h2>
+<div class="outline-text-2" id="text-13">
+
+
+
+
+<pre class="src src-sh">apt-get install memcached libapache2-mod-wsgi openstack-dashboard
+apt-get remove --purge openstack-dashboard-ubuntu-theme
+</pre>
+
+<p>
+编辑/etc/openstack_dashboard/local_settings.py设置
+</p>
+
+
+<pre class="src src-sh">OPENSTACK_KEYSTONE_DEFAULT_ROLE = <span style="color: #2aa198;">"admin"</span>
+<span style="color: #2aa198;">'enable_firewall'</span> = True
+TIME_ZONE = <span style="color: #2aa198;">"Asia/Shanghai"</span>
+</pre>
+
+<p>
+重启apache2
+</p>
+
+
+<pre class="src src-sh">/etc/init.d/apache2 restart
+</pre>
+
+<p>
+浏览器访问192.168.60.108/horizon.
+</p></div>
+
+</div>
+
+<div id="outline-container-14" class="outline-2">
+<h2 id="sec-14"><span class="section-number-2">14</span> 参考资料</h2>
+<div class="outline-text-2" id="text-14">
+
+
+</div>
+
+<div id="outline-container-14-1" class="outline-3">
+<h3 id="sec-14-1"><span class="section-number-3">14.1</span> heat</h3>
+<div class="outline-text-3" id="text-14-1">
+
+<p><a href="http://openstack.redhat.com/Deploy_an_application_with_Heat">http://openstack.redhat.com/Deploy_an_application_with_Heat</a> <br/>
+<a href="https://answers.launchpad.net/heat/+question/238879">https://answers.launchpad.net/heat/+question/238879</a> <br/>
+<a href="http://digitalsanctum.com/2013/05/01/how-to-install-openstack-heat/">http://digitalsanctum.com/2013/05/01/how-to-install-openstack-heat/</a> <br/>
+<a href="http://docs.openstack.org/developer/heat/getting_started/on_devstack.html">http://docs.openstack.org/developer/heat/getting_started/on_devstack.html</a> <br/>
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-15" class="outline-2">
+<h2 id="sec-15"><span class="section-number-2">15</span> 安装及使用问题</h2>
+<div class="outline-text-2" id="text-15">
+
+<ol>
+<li>neutron-server无法启动，log报错AttributeError: 'NoneType' object has no attribute 'startswith' <br/>
+   原因是CONF.api_paste_config无法找到，neutron.conf中api-paste.ini路径写错.
+</li>
+<li>mysql报错Host 'hostname' is blocked because of many connection errors. <br/>
+   Unblock with 'mysqladmin flush-hosts',运行 mysqladmin -uroot -p flush-hosts解决.是因为忘了建neutron数据库便启动neutron服务，造成连接问题。参考<a href="http://blog.itechol.com/space-33-do-blog-id-5670.html">mysql 连接出错 'mysqladmin flush-hosts'</a>
+</li>
+<li>ceilometer信息界面一直显示加载中,参考<a href="https://bugs.launchpad.net/ceilometer/+bug/1232437">https://bugs.launchpad.net/ceilometer/+bug/1232437</a> 3楼的方法，改ceilometer.conf
+
+
+
+<pre class="src src-sh">admin_tenant_name = admin
+admin_user = admin
+admin_password = password
+</pre>
+
+</li>
+<li>启用了namespace，建立虚拟机没有qvo,qvb等设备，虚拟机直接连在br-int上，nova.conf缺少libvirt_vif_driver=nova.virt.libvirt.vif.LibvirtHybridOVSBridgeDriver
+</li>
+<li>l3-agent.log Failed unplugging interface 'qr-3fbe5f9e-a3',Failed unplugging interface 'qg-43105246-13' router忘了配接口
+</li>
+<li>删除了所有的router和network，ip netns仍旧能看到命名空间,运行neutron-netns-cleanup命令即可.
+</li>
+</ol>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-07 10:38.</p> 
+</div>
+</body>
+</html>

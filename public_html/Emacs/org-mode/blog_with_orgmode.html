@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>使用org-mode导出功能建立博客</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="使用org-mode导出功能建立博客"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2013-12-31 15:52"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../../css/org.css" rel="stylesheet" type="text/css">
+<link href="../../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">使用org-mode导出功能建立博客</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 博客目录</a></li>
+<li><a href="#sec-2">2 init.el配置文件</a></li>
+<li><a href="#sec-3">3 生成站点</a></li>
+<li><a href="#sec-4">4 启动服务</a></li>
+<li><a href="#sec-5">5 参考</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 博客目录</h2>
+<div class="outline-text-2" id="text-1">
+
+<pre class="example">
+~/blog/
+   |- www/
+   |    |- css/
+   |    |    `-org.css
+   |    |    `-level-0.orgcss
+   |    |- static/
+   |    |- index.org
+   |    |- sitemap.org
+   |- public_html/
+   |    |- server.py
+</pre>
+
+<ul>
+<li>www目录为org源文件目录
+</li>
+<li>public_html为html文件到处目录
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> init.el配置文件</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>加入如下内容
+</p>
+
+
+<pre class="src src-emacs-lisp">(<span style="color: #859900;">require</span> '<span style="color: #2aa198;">org-publish</span>)
+(setq org-publish-project-alist
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">notes&#32452;&#20214;</span>
+'((
+     <span style="color: #2aa198;">"org-notes"</span>
+     <span style="color: #859900;">:base-directory</span> <span style="color: #2aa198;">"~/blog/www/"</span> <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#35774;&#32622;&#23384;&#25918;.org&#25991;&#20214;&#20301;&#32622;</span>
+     <span style="color: #859900;">:base-extension</span> <span style="color: #2aa198;">"org"</span> <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#20165;&#22788;&#29702; .org &#26684;&#24335;&#25991;&#20214;</span>
+     <span style="color: #859900;">:publishing-directory</span> <span style="color: #2aa198;">"~/blog/public_html/"</span> <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#23548;&#20986;html&#25991;&#20214;&#20301;&#32622;</span>
+    <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">:publishing-directory "/ssh:user@server" ;export to server</span>
+     <span style="color: #859900;">:recursive</span> t
+     <span style="color: #859900;">:publishing-function</span> org-publish-org-to-html
+     <span style="color: #859900;">:headline-levels</span> 4 <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">Just the default for this project.</span>
+     <span style="color: #859900;">:auto-preamble</span> t
+     <span style="color: #859900;">:html-postamble</span> t
+     <span style="color: #859900;">:auto-sitemap</span> t                  <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#33258;&#21160;&#29983;&#25104; sitemap.org</span>
+     <span style="color: #859900;">:sitemap-filename</span> <span style="color: #2aa198;">"sitemap0.org"</span>  <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#21517;&#31216;&#20026;sitemap.org(&#40664;&#35748;)</span>
+     <span style="color: #859900;">:sitemap-title</span> <span style="color: #2aa198;">"Archive"</span>         <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#26631;&#39064;Sitemap</span>
+     <span style="color: #859900;">:export-creator-info</span> nil    <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#31105;&#27490;&#22312; postamble &#26174;&#31034;"Created by Org"</span>
+     <span style="color: #859900;">:export-author-info</span> nil     <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#31105;&#27490;&#22312; postamble &#26174;&#31034; "Author: Your Name"</span>
+     <span style="color: #859900;">:auto-postamble</span> nil
+     <span style="color: #859900;">:table-of-contents</span> t      <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">t&#29983;&#25104;&#25991;&#31456;&#30446;&#24405;,&#31105;&#27490;&#20026;nil</span>
+     <span style="color: #859900;">:section-numbers</span> t        <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">t&#27573;&#33853;&#26631;&#39064;&#21069;&#20351;&#29992;&#25968;&#23383;&#65292;&#31105;&#27490;&#20026;nil</span>
+     <span style="color: #859900;">:html-postamble</span> <span style="color: #2aa198;">"    &lt;p class=\"postamble\"&gt;Last Updated %d.&lt;/p&gt; "</span>
+     <span style="color: #859900;">:style-include-default</span> nil  <span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">&#31105;&#29992;&#40664;&#35748; css &#26679;&#24335;,&#20351;&#29992;&#33258;&#23450;&#20041;css</span>
+    )
+<span style="color: #586e75; font-style: italic;">;;</span><span style="color: #586e75; font-style: italic;">static &#32452;&#20214;</span>
+    (<span style="color: #2aa198;">"org-static"</span>
+     <span style="color: #859900;">:base-directory</span> <span style="color: #2aa198;">"~/blog/www/"</span>
+     <span style="color: #859900;">:base-extension</span> <span style="color: #2aa198;">"css</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">js</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">png</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">jpg</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">gif</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">pdf</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">mp3</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">ogg</span><span style="color: #b58900; font-weight: bold;">\\</span><span style="color: #cb4b16; font-weight: bold;">|</span><span style="color: #2aa198;">swf"</span>
+     <span style="color: #859900;">:publishing-directory</span> <span style="color: #2aa198;">"~/blog/public_html/"</span>
+     <span style="color: #859900;">:recursive</span> t
+     <span style="color: #859900;">:publishing-function</span> org-publish-attachment
+     )
+<span style="color: #586e75; font-style: italic;">;;</span><span style="color: #586e75; font-style: italic;">publish &#32452;&#20214;</span>
+    (<span style="color: #2aa198;">"org"</span> <span style="color: #859900;">:components</span> (<span style="color: #2aa198;">"org-notes"</span> <span style="color: #2aa198;">"org-static"</span>))
+))
+
+#&#27599;&#27425;&#21457;&#24067;&#35810;&#38382;&#26159;&#21542;&#37325;&#26032;&#21457;&#24067;&#20840;&#37096;&#20869;&#23481;
+(<span style="color: #859900;">defun</span> <span style="color: #268bd2;">publish-project</span> (project no-cache)
+(interactive <span style="color: #2aa198;">"sName of project: \nsNo-cache?[y/n] "</span>)
+(<span style="color: #859900;">if</span> (or (string= no-cache <span style="color: #2aa198;">"y"</span>)
+        (string= no-cache <span style="color: #2aa198;">"Y"</span>))
+    (setq org-publish-use-timestamps-flag nil))
+(org-publish-project project)
+(setq org-publish-use-timestamps-flag t))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 生成站点</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>www目录下创建sitemap.org
+</p>
+
+
+<pre class="src src-sh">TITLE: Archive
+SETUPFILE: css/level-0.orgcss
+INCLUDE: sitemap0.org
+</pre>
+
+<p>
+TITLE,SETUPFILE,INCLUDE前都有#+
+</p>
+<p>
+发布时自动生成的sitemap0.html是没有css的，手动创建sitemap.org,并将sitemap0.org
+包含进来，生成的sitemap.html有css，并有完整的sitemap内容。
+</p>
+<p>
+用M-x org-publist-project或M-x publish-projcet选择org项目发布，用浏览器打开public_html下的index.html或sitemap.html查看站点.
+</p></div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 启动服务</h2>
+<div class="outline-text-2" id="text-4">
+
+<p>可以在public_html手动起SimpleHTTPServer
+</p>
+
+
+<pre class="src src-sh">python -m SimpleHTTPServer 1000
+</pre>
+
+<p>
+即可在1000端口运行web服务，也就可以在非本机访问博客了。
+</p>
+<p>
+为了方便，在public_html目录下创建server.py
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">import</span> SimpleHTTPServer
+<span style="color: #859900;">import</span> SocketServer
+<span style="color: #859900;">import</span> cgi
+
+<span style="color: #268bd2;">host</span> = <span style="color: #2aa198;">''</span>
+<span style="color: #268bd2;">port</span> = 8080
+
+<span style="color: #859900;">class</span> <span style="color: #b58900;">simpleHandler</span>(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">do_POST</span>(<span style="color: #859900;">self</span>):
+        <span style="color: #859900;">try</span>:
+            <span style="color: #268bd2;">form</span> = cgi.FieldStorage(
+                                    fp = <span style="color: #859900;">self</span>.rfile,
+                                    headers = <span style="color: #859900;">self</span>.headers,
+                                    environ = {
+                                               <span style="color: #2aa198;">'REQUEST_METHOD'</span>:<span style="color: #2aa198;">'POST'</span>,
+                                               <span style="color: #2aa198;">'CONTENT_TYPE'</span>:<span style="color: #859900;">self</span>.headers.getheader(<span style="color: #2aa198;">'current-type'</span>)
+                                               }
+                                    )
+
+            <span style="color: #859900;">print</span> form
+
+        <span style="color: #859900;">except</span> <span style="color: #b58900;">IOError</span>:
+            <span style="color: #859900;">self</span>.send_error(404, <span style="color: #2aa198;">' POST error'</span>);
+
+<span style="color: #268bd2;">conn</span> = SocketServer.TCPServer((host, port), simpleHandler)
+
+<span style="color: #859900;">print</span> <span style="color: #2aa198;">'start server at port:'</span>, port
+
+conn.serve_forever()
+</pre>
+
+<p>
+直接python server.py即可启动服务。
+</p></div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 参考</h2>
+<div class="outline-text-2" id="text-5">
+
+<p><a href="http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html">Publishing Org-mode files to HTML</a> <br/>
+<a href="http://www.personal.psu.edu/nus173/sitecreation.html">How to Create This Site</a> <br/>
+<a href="http://www.dbrunner.de/it/org-mode.html">好文，介绍sitemap的css和导航</a> <br/>
+<a href="http://thomasf.github.io/solarized-css/">Solarized CSS</a>
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2013-12-31 15:52.</p> 
+</div>
+</body>
+</html>

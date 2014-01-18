@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Linux系统忘记root密码的解决办法</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Linux系统忘记root密码的解决办法"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-10 10:53"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Linux系统忘记root密码的解决办法</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 SUSE11</a></li>
+<li><a href="#sec-2">2 Ubuntu</a></li>
+<li><a href="#sec-3">3 Ubuntu server</a></li>
+<li><a href="#sec-4">4 参考</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> SUSE11</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>方法：在启动linux的选项里加上init=/bin/bash，通过给内核传递init=/bin/bash参数使得OS在运行login程序之前运行bash，从而进入命令行。
+</p><ol>
+<li>重启进入grub引导界面，选择“SUSE Linux Entrerprise&hellip;”,下边的引导选项行最后
+</li>
+</ol>
+
+<p>输入init=/bin/bash,回车
+</p>
+<p>
+   <img src="../static/img/2014-01/suse-passwd.png"  alt="../static/img/2014-01/suse-passwd.png" />
+</p><ol>
+<li>系统进入bash，出现(none)#:提示符
+
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26681;&#25991;&#20214;&#31995;&#32479;&#37325;&#26032;mount&#20026;&#21487;&#35835;&#20889;</span>
+mount -o remount,rw /
+<span style="color: #859900;">cd</span> /usr/bin
+passwd root
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#23558;&#26681;&#25991;&#20214;&#31995;&#32479;&#32622;&#20026;&#21407;&#26469;&#30340;&#29366;&#24577;</span>
+mount -o remount,ro /
+</pre>
+
+</li>
+<li>重启以新密码登录
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Ubuntu</h2>
+<div class="outline-text-2" id="text-2">
+
+<ol>
+<li>在grub菜单recovery mode选项，按e进入编辑模式
+</li>
+<li>编辑kernel那行最后面的ro single改成rw single init=/bin/bash,按Ctrl+x
+</li>
+</ol>
+
+<p>进入单用户模式,当前用户即为root
+</p><ol>
+<li>passwd root
+</li>
+<li>ctrl+alt+delete重启
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Ubuntu server</h2>
+<div class="outline-text-2" id="text-3">
+
+<ol>
+<li>在grub菜单recovery mode选项，按e进入编辑模式
+</li>
+<li>把ro recovery nomodeset 改成rw single init=/bin/bash，Ctrl+x进入单用
+</li>
+</ol>
+
+<p>户模式
+</p></div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 参考</h2>
+<div class="outline-text-2" id="text-4">
+
+<p><a href="http://designmylife.blog.163.com/blog/static/2067142542012418225623/">1</a>   <a href="http://java-2007.iteye.com/blog/712708">2</a>
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-10 10:53.</p> 
+</div>
+</body>
+</html>

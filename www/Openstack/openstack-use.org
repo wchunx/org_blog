@@ -1,0 +1,25 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+TITLE: openstack网络
+#+DATE: 2014-01-10 10:54
+#+OPTIONS: ^:{}
+
+* Namespace
+** openstack中的配置
+1. 多租户网络环境下，使用命名空间更容易达到租户的网络安全，每个租户的网络流量和设备接口都是相互隔离的(属于不同的namespace)。使用namespace的一个明显优势就是不同租户可以IP重用。(觉得标准的情况是每个租户有一个router,可以有多个子网)
+2. 如果不使用namespace，需要配置
+   l3-agent.ini 和 dhcp-agent.ini
+   #+BEGIN_SRC sh
+   use_namespaces=False
+   #+END_SRC
+   neutron.conf
+   #+BEGIN_SRC sh
+   allow_overlapping_ips=False
+   #+END_SRC
+3. 不使用namespace每台计算节点只能有1各router，且需要配置router_id.
+4. 参考 [[http://www.mirantis.com/blog/the-road-to-hong-kong-openstack-summit-speakers-4-neutron-network-namespaces-and-iptables/][1]] [[https://www.mirantis.com/blog/identifying-and-troubleshooting-neutron-namespaces/][2]]
+** qrouter 和 qdhcp
+1. 每产生一个router设备，都会创建一个qrouter namespace,其中有qg-xxx设备(路由WLAN口，外网IP)和qr-xxx设备(路由LAN口，子网网关).每个qrouter空间内routing table因处在不同空间而相互隔离，所以不同router设备下可以有相同的子网.qg-xxx在br-ex上，qr-xxx在br-int上。
+2. 对于一个子网router通常会取第一个ip(qr-xxx)作子网网管，dhcp server取第二个IP(tapxxx)作dhcp监听.VM使用IP池中的其它IP。dhcp server会有自己的DHCP namespace,这样IP的分配和广播数据流量都会局限在自己的租户网络内。tapxxx在br-int上。
+3. 假设一个租户有一个路由，一个或多个子网，那么一个租户下会有一个qrouter空间，多个qdhcp空间.
+4. 当创建router或network后，namespace并不会马上建立，有VM加入子网时，DHCP namespace建立，router设置网关时，ROUTER namespace建立；router或network删除后，namespace并不会自动删除，需要手动删除,可以ip netns delete或neutron-netns-clenaup
+

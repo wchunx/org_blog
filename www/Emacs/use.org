@@ -1,0 +1,72 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+TITLE: Emacs使用问题
+#+DATE: 2014-01-16 08:55
+#+OPTIONS: ^:{}
+
+* batch模式下的语法高亮
+#+BEGIN_SRC elisp
+;org-mode M-x org-version查看版本
+;(setq load-path (cons "~/.emacs.d/plugins/org-8.2.4/lisp" load-path))
+;(require 'org-install)
+
+(load-file "~/testemacs/htmlize.el")
+;(require 'htmlize)
+
+;(setq org-export-htmlize-output-type 'css)
+
+;; Source file: http://www.dd.chalmers.se/~bojohan/emacs/lisp/my-htmlize.el
+;; Output:      http://www.dd.chalmers.se/~bojohan/emacs/out.html
+
+;; Make sure the the htmlize library is in load-path.
+;; You might want to load ~/.emacs
+
+;; USAGE:
+;;     emacs -batch -l my-htmlize.el INFILE > OUTFILE
+
+
+;; Example:
+(custom-set-faces
+ '(default                      ((t (:foreground "#ffffff" :background "black"))))
+ '(font-lock-builtin-face       ((t (:foreground "#ff0000"))))
+ '(font-lock-comment-face       ((t (:bold t :foreground "#333300"))))
+ '(font-lock-constant-face      ((t (:foreground "magenta"))))
+ '(font-lock-function-name-face ((t (:bold t :foreground "Blue"))))
+ '(font-lock-keyword-face       ((t (:foreground "yellow3"))))
+ '(font-lock-string-face        ((t (:foreground "light blue"))))
+ '(font-lock-type-face          ((t (:foreground "green"))))
+ '(font-lock-variable-name-face ((t (:foreground "cyan" :bold t))))
+ '(font-lock-warning-face       ((t (:foreground "red" :weight bold)))))
+
+(setq htmlize-use-rgb-map 'force)
+(require 'htmlize)
+
+(find-file (pop command-line-args-left))
+(font-lock-fontify-buffer)
+(with-current-buffer (htmlize-buffer)
+  (princ (buffer-string)))
+
+
+;org-html-publish-to-html
+(require 'org-publish)
+(setq org-publish-project-alist
+      '(
+        ("test"
+         ;; Path to your org files.
+         :base-directory "~/orgtest/"
+         :base-extension "org"
+         ;; Path to your Jekyll project.
+         :publishing-directory "~/orgtest/"
+         :recursive t
+         :publishing-function org-publish-org-to-html
+         :headline-levels 4
+         :html-extension "html"
+         :body-only t ;; Only export section between <body> </body>
+         )
+        ("blog-wchunx" :components ("test"))
+        ))
+
+;emacs --batch -l ~/testemacs/init.el --eval "(progn (load-file \"~/testemacs/htmlize.el\") (require 'htmlize)) (setq org-export-htmlize-output-type 'inline-css)" -f org-publish-project
+
+;emacs -batch -l /home/wchunx/test_of_nikola/plugins/orgmode/init.el --eval (nikola-html-export "/home/wchunx/test_of_nikola/posts/hello.org" "/home/wchunx/test_of_nikola/cache/posts/hello.html")
+#+END_SRC
+** 参考[[http://sebastien.kirche.free.fr/emacs_stuff/elisp/my-htmlize.el][my-htmlize.el]]

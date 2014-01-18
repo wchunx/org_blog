@@ -1,0 +1,72 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+TITLE: Django数据操作
+#+DATE: 2014-01-14 20:00
+#+OPTIONS: ^:{}
+
+* MVC模式
+Django是一种MVC框架，以下是Django中 M、V和C各自的含义：
++ M 数据存取部分，由django数据库层处理，本章要讲述的内容。
++ V 选择显示哪些数据要显示以及怎样显示的部分，由视图和模板处理。
++ C 根据用户输入委派视图的部分，由Django框架根据URLconf设置，对给定URL调用适当的Python函数。
+由于C由框架自行处理，而Django里更关注的是模型（Model）、模板(Template)和视图（Views），Django 也被称为 MTV 框架 。在 MTV 开发模式中：
++ M 代表模型（Model），即数据存取层。该层处理与数据相关的所有事务：如何存取、如何验证有效性、包含哪些行为以及数据之间的关系等。
++ T 代表模板(Template)，即表现层。该层处理与表现相关的决定：如何在页面或其他类型文档中进行显示。
++ V 代表视图（View），即业务逻辑层。该层包含存取模型及调取恰当模板的相关逻辑。你可以把它看作模型与模板之间的桥梁。
+* 数据库配置
+** setting.py中数据库的配置
+#+BEGIN_SRC python
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql', #使用何种数据库，这里用mysql
+        'NAME': 'site',                       #数据库名
+        'USER': 'site',                       #用户名
+        'PASSWORD': 'site',                   #密码
+        'HOST': 'localhost',                  #连接主机
+        'PORT': '',                           #连接端口，留空就是默认端口
+    }
+}
+#+END_SRC
+** 测试
+创建数据库
+#+BEGIN_SRC sh
+create database site;
+GRANT ALL PRIVILEGES ON site.* TO 'site'@'localhost' IDENTIFIED BY 'site';
+GRANT ALL PRIVILEGES ON site.* TO 'site'@'%' IDENTIFIED BY 'site';
+#+END_SRC
+使用前确保已安装python-mysqldb
+#+BEGIN_SRC python
+#启动解释器
+python manage.py shell
+>>> from django.db import connection
+>>> cursor = connection.cursor()
+#+END_SRC
+如果没有错误信息表示配置正确。
+* 创建app
+Django app： 一个包含模型，视图和Django代码，并且形式为独立Python包的完整Django应用。
+** project与app
+它们的区别就是一个是配置，另一个是代码：
+
+一个project包含很多个Django app以及对它们的配置。\\
+技术上，project的作用是提供配置文件，比方说哪里定义数据库连接信息, 安装的app列表，TEMPLATE_DIRS，等等。
+一个app是一套Django功能的集合，通常包括模型和视图，按Python的包结构的方式存在。
+
+如果只是建造一个简单的Web站点，可能一个app就可以了；但如果是一个包含许多不相关的模块的复杂的网站，例如电子商务和社区之类的站点，那么你可能需要把这些模块划分成不同的app，以便以后复用。
+
+也可以不创建app，如前面使用的例子，我们只是简单的创建了一个称为views.py的文件，编写了一些函数并在URLconf中设置了各个函数的映射。这些情况都不需要使用apps。
+
+*但是，系统对app有一个约定：如果你使用了Django的数据库层（模型），你必须创建一个Django app。模型必须存放在apps中。因此，为了开始建造我们的模型，我们必须创建一个新的app。*
+
+在项目mysite目录下创建books app。
+#+BEGIN_SRC sh
+python manage.py startapp books
+#+END_SRC
+books目录
+
+: books/
+:  |- __init__.py
+:  |- models.py
+:  |- tests.py
+:  |- views.py
+
+这个目录包含了这个app的模型和视图。
+

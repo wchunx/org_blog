@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>openstack网络</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="openstack网络"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-10 10:54"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">openstack网络</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Namespace</a>
+<ul>
+<li><a href="#sec-1-1">1.1 openstack中的配置</a></li>
+<li><a href="#sec-1-2">1.2 qrouter 和 qdhcp</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Namespace</h2>
+<div class="outline-text-2" id="text-1">
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> openstack中的配置</h3>
+<div class="outline-text-3" id="text-1-1">
+
+<ol>
+<li>多租户网络环境下，使用命名空间更容易达到租户的网络安全，每个租户的网络流量和设备接口都是相互隔离的(属于不同的namespace)。使用namespace的一个明显优势就是不同租户可以IP重用。(觉得标准的情况是每个租户有一个router,可以有多个子网)
+</li>
+<li>如果不使用namespace，需要配置
+   l3-agent.ini 和 dhcp-agent.ini
+
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">use_namespaces</span>=False
+</pre>
+
+<p>
+   neutron.conf
+</p>
+
+
+<pre class="src src-sh"><span style="color: #268bd2;">allow_overlapping_ips</span>=False
+</pre>
+
+</li>
+<li>不使用namespace每台计算节点只能有1各router，且需要配置router_id.
+</li>
+<li>参考 <a href="http://www.mirantis.com/blog/the-road-to-hong-kong-openstack-summit-speakers-4-neutron-network-namespaces-and-iptables/">1</a> <a href="https://www.mirantis.com/blog/identifying-and-troubleshooting-neutron-namespaces/">2</a>
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> qrouter 和 qdhcp</h3>
+<div class="outline-text-3" id="text-1-2">
+
+<ol>
+<li>每产生一个router设备，都会创建一个qrouter namespace,其中有qg-xxx设备(路由WLAN口，外网IP)和qr-xxx设备(路由LAN口，子网网关).每个qrouter空间内routing table因处在不同空间而相互隔离，所以不同router设备下可以有相同的子网.qg-xxx在br-ex上，qr-xxx在br-int上。
+</li>
+<li>对于一个子网router通常会取第一个ip(qr-xxx)作子网网管，dhcp server取第二个IP(tapxxx)作dhcp监听.VM使用IP池中的其它IP。dhcp server会有自己的DHCP namespace,这样IP的分配和广播数据流量都会局限在自己的租户网络内。tapxxx在br-int上。
+</li>
+<li>假设一个租户有一个路由，一个或多个子网，那么一个租户下会有一个qrouter空间，多个qdhcp空间.
+</li>
+<li>当创建router或network后，namespace并不会马上建立，有VM加入子网时，DHCP namespace建立，router设置网关时，ROUTER namespace建立；router或network删除后，namespace并不会自动删除，需要手动删除,可以ip netns delete或neutron-netns-clenaup
+</li>
+</ol>
+
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-10 10:54.</p> 
+</div>
+</body>
+</html>

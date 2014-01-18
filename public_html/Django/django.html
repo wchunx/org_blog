@@ -1,0 +1,1333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>django学习笔记</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="django学习笔记"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-10T09:54+0800"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">django学习笔记</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 学习资料</a></li>
+<li><a href="#sec-2">2 安装</a>
+<ul>
+<li><a href="#sec-2-1">2.1 创建一个项目</a>
+<ul>
+<li><a href="#sec-2-1-1">2.1.1 创建项目mysqite</a></li>
+<li><a href="#sec-2-1-2">2.1.2 启动服务</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 视图和URL</a>
+<ul>
+<li><a href="#sec-3-1">3.1 demo</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1 views.py</a></li>
+<li><a href="#sec-3-1-2">3.1.2 urls.py</a></li>
+<li><a href="#sec-3-1-3">3.1.3 常用到的正则表达式</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-2">3.2 django处理请求的工作机制</a></li>
+<li><a href="#sec-3-3">3.3 更进一步：动态url</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 模板</a>
+<ul>
+<li><a href="#sec-4-1">4.1 介绍</a>
+<ul>
+<li><a href="#sec-4-1-1">4.1.1 模板组织形式</a></li>
+<li><a href="#sec-4-1-2">4.1.2 常用模板标签</a>
+<ul>
+<li><a href="#sec-4-1-2-1">4.1.2.1 if/else</a></li>
+<li><a href="#sec-4-1-2-2">4.1.2.2 for</a></li>
+<li><a href="#sec-4-1-2-3">4.1.2.3 ifequal/ifnotequal</a></li>
+<li><a href="#sec-4-1-2-4">4.1.2.4 block</a></li>
+<li><a href="#sec-4-1-2-5">4.1.2.5 comment</a></li>
+<li><a href="#sec-4-1-2-6">4.1.2.6 extends</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-1-3">4.1.3 模板注释</a></li>
+<li><a href="#sec-4-1-4">4.1.4 过滤器</a>
+<ul>
+<li><a href="#sec-4-1-4-1">4.1.4.1 简介</a></li>
+<li><a href="#sec-4-1-4-2">4.1.4.2 常用过滤器</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-4-2">4.2 解析器中直接使用模板</a>
+<ul>
+<li><a href="#sec-4-2-1">4.2.1 Template的使用方式</a></li>
+<li><a href="#sec-4-2-2">4.2.2 句点进行深度变量查找</a></li>
+<li><a href="#sec-4-2-3">4.2.3 方法调用行为</a></li>
+<li><a href="#sec-4-2-4">4.2.4 无效变量</a></li>
+<li><a href="#sec-4-2-5">4.2.5 Context对象</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-3">4.3 在视图中使用模板</a>
+<ul>
+<li><a href="#sec-4-3-1">4.3.1 定义templates目录</a></li>
+<li><a href="#sec-4-3-2">4.3.2 编写template文件</a></li>
+<li><a href="#sec-4-3-3">4.3.3 编写视图函数</a></li>
+<li><a href="#sec-4-3-4">4.3.4 简化流程</a></li>
+<li><a href="#sec-4-3-5">4.3.5 locals()技巧</a></li>
+<li><a href="#sec-4-3-6">4.3.6 模板子目录</a></li>
+<li><a href="#sec-4-3-7">4.3.7 include模板标签</a></li>
+<li><a href="#sec-4-3-8">4.3.8 模板继承extends</a>
+<ul>
+<li><a href="#sec-4-3-8-1">4.3.8.1 建立基础模板</a></li>
+<li><a href="#sec-4-3-8-2">4.3.8.2 建立子模板</a></li>
+<li><a href="#sec-4-3-8-3">4.3.8.3 模板继承层次</a></li>
+<li><a href="#sec-4-3-8-4">4.3.8.4 模板使用技巧</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 学习资料</h2>
+<div class="outline-text-2" id="text-1">
+
+<p><a href="http://djangobook.py3k.cn/2.0/">The Django Book</a> <br/>
+<a href="http://www.cnblogs.com/BeginMan/category/458761.html">Django入门</a> <br/>
+<a href="http://www.nowamagic.net/academy/part/13/286/">Python与Django篇</a> <br/>
+<a href="http://www.w3school.com.cn/index.html">w3school</a> <br/>
+<a href="https://github.com/gnemoug/ComPerformance">ComPerformance</a>
+</p></div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 安装</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>ubuntu上
+</p>
+
+
+<pre class="src src-python">sudo apt-get intall python-django
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#39564;&#35777;</span>
+&gt;&gt;&gt; <span style="color: #859900;">import</span> django
+&gt;&gt;&gt; django.VERSION
+(1, 3, 1, <span style="color: #2aa198;">'final'</span>, 0)
+</pre>
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> 创建一个项目</h3>
+<div class="outline-text-3" id="text-2-1">
+
+
+</div>
+
+<div id="outline-container-2-1-1" class="outline-4">
+<h4 id="sec-2-1-1"><span class="section-number-4">2.1.1</span> 创建项目mysqite</h4>
+<div class="outline-text-4" id="text-2-1-1">
+
+
+
+
+<pre class="src src-sh">django-admin startproject mysite
+</pre>
+
+<p>
+mysite目录结构：
+mysite/
+</p><ul>
+<li>manage.py <br/>
+</li>
+<li>mysite/ <br/>
+<ul>
+<li>_<sub>init</sub>__.py <br/>
+</li>
+<li>setting.py <br/>
+</li>
+<li>urls.py <br/>
+</li>
+<li>wsgi.py <br/>
+</li>
+</ul>
+
+</li>
+<li>_init_.py:让Python把该目录当成一个开发包(即一组模块)所需的文件
+</li>
+<li>manage.py:一种命令行工具，以多种方式与django项目交互
+</li>
+<li>settings.py:该Django项目的设置
+</li>
+<li>urls.py:该Django项目的URL设置
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-2-1-2" class="outline-4">
+<h4 id="sec-2-1-2"><span class="section-number-4">2.1.2</span> 启动服务</h4>
+<div class="outline-text-4" id="text-2-1-2">
+
+<p>mysite下
+</p>
+
+
+<pre class="src src-sh">python manage.py runserver
+</pre>
+
+<p>
+这将会在端口8000启动一个本地服务器,浏览器访问 <a href="http://127.0.0.1:8000/">http://127.0.0.1:8000/</a>, 可以看到django欢迎页面。
+更改主机端口
+</p>
+
+
+<pre class="src src-sh">python manage.py runserver 8080
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#35753;django&#30417;&#21548;&#25152;&#26377;&#30340;&#32593;&#32476;&#25509;&#21475;&#65292;&#22240;&#27492;&#20854;&#20182;&#30005;&#33041;&#23601;&#33021;&#36830;&#25509;&#21040;&#12290;</span>
+python manage.py runserver 0.0.0.0:8000
+</pre>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 视图和URL</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>views.py(视图):导入声明，定义视图函数. <br/>
+urls.py(URLconf):URLconf就像是Django所支撑网站的目录。它的本质是URL模式以及要为该URL模式调用的视图函数之间的映射表。用来告诉django某个url调用那个视图函数。
+</p>
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> demo</h3>
+<div class="outline-text-3" id="text-3-1">
+
+
+</div>
+
+<div id="outline-container-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> views.py</h4>
+<div class="outline-text-4" id="text-3-1-1">
+
+<p>mysite目录下创建views.py
+</p>
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: utf-8 -*-</span>
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20174;django.http&#27169;&#22359;&#20013;&#23548;&#20837;HttpResponse&#31867;</span>
+<span style="color: #859900;">from</span> django.http <span style="color: #859900;">import</span> HttpResponse
+<span style="color: #859900;">import</span> datetime
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">hello</span>(request):
+    <span style="color: #859900;">return</span> HttpResponse(<span style="color: #2aa198;">"Hello world"</span>)
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">current_datetime</span>(request):
+    <span style="color: #268bd2;">now</span>=datetime.datetime.now()
+    <span style="color: #268bd2;">html</span>=<span style="color: #2aa198;">"&lt;html&gt;&lt;body&gt;&#29616;&#22312;&#26102;&#21051;&#65306;%s.&lt;/body&gt;&lt;/html&gt;"</span> %now
+    <span style="color: #859900;">return</span> HttpResponse(html)
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">my_homepage_view</span>(request):
+    <span style="color: #859900;">return</span> HttpResponse(<span style="color: #2aa198;">"nothing"</span>)
+</pre>
+
+<ol>
+<li>HttpResponse类位于django.http模块中,需要导入
+</li>
+<li>(views.py)视图中每一个函数称作视图函数,每个视图函数至少包含一个参数,即request,这是一个触发这个视图、包含当前Web请求信息的对象，是类django.http.HttpRequest的一个实例.
+</li>
+<li>在每一个视图(views)都需要实例化、处理、返回HttpResponse对象
+</li>
+</ol>
+
+<p>一般情况下，创建一个HttpResponse时，以字符串的形式传递页面内容给HttpResponse构造函数。
+</p></div>
+
+</div>
+
+<div id="outline-container-3-1-2" class="outline-4">
+<h4 id="sec-3-1-2"><span class="section-number-4">3.1.2</span> urls.py</h4>
+<div class="outline-text-4" id="text-3-1-2">
+
+<p>url就像一座桥梁，通过这个桥梁我们才找到视图中对应的代码，渲染的模板（暂时没有用到模板），而这一切都通过URLConf(即urls.py)，在我们django-admin startproject mysite后，该脚本会自动建立一份URLConf（即urls.py文件），我们可以在settings.py中找到它的真身，如下：
+</p>
+
+
+<pre class="src src-python">...
+<span style="color: #268bd2;">ROOT_URLCONF</span> = <span style="color: #2aa198;">'mysite.urls'</span>
+...
+</pre>
+
+<p>
+urls.py打开如下
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">from</span> django.conf.urls.defaults <span style="color: #859900;">import</span> * <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">[1]</span>
+
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">Uncomment the next two lines to enable the admin:</span>
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">from django.contrib import admin</span>
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">admin.autodiscover()</span>
+
+<span style="color: #268bd2;">urlpatterns</span> = patterns(<span style="color: #2aa198;">''</span>,    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">[2]</span>
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">Example:</span>
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">(r'^mysite/', include('mysite.foo.urls')),</span>
+
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">Uncomment the admin/doc line below and add 'django.contrib.admindocs'</span>
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">to INSTALLED_APPS to enable admin documentation:</span>
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">(r'^admin/doc/', include('django.contrib.admindocs.urls')),</span>
+
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">Uncomment the next line to enable the admin:</span>
+    <span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">(r'^admin/', include(admin.site.urls)),</span>
+)
+</pre>
+
+<ol>
+<li>从django.conf.urls.defaults导入所有模块，它们是Django URLconf的基本构造,其中包括了一个叫做patterns的函数
+</li>
+<li>patterns()函数将处理结果保存到urlpatterns变量中,patterns函数当前只有一个参数—一个空的字符串
+</li>
+</ol>
+
+<p>编辑该文件以展示hello和current<sub>datetime视图</sub>
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">from</span> django.conf.urls.defaults <span style="color: #859900;">import</span> *
+<span style="color: #859900;">from</span> mysite.views <span style="color: #859900;">import</span> hello, current_datetime, my_homepage_view
+
+<span style="color: #268bd2;">urlpatterns</span> = patterns(<span style="color: #2aa198;">''</span>,
+    (<span style="color: #2aa198;">'^hello/$'</span>, hello),
+    (r<span style="color: #2aa198;">'^time/$'</span>,current_datetime),
+    (<span style="color: #2aa198;">'^$'</span>, my_homepage_view),
+)
+</pre>
+
+<ol>
+<li>patterns函数中的参数其实就是一个元祖，元组第一个元素是一个正则表达式，后边是对应的视图函数
+</li>
+<li>在浏览器中通过输入<a href="http://127.0.0.1:8000/time">http://127.0.0.1:8000/time</a> ，Django在URLconf中的所有URL模式中，查找第一个匹配/time/的条目。如果匹配成功，则视图函数返回一个HttpResponse，调用current<sub>datetime这个视图函数，Django转换HttpResponse为一个适合的HTTP</sub> response， 以Web page显示出来，(在没有模板定义的情况下)显示输出结果。
+</li>
+<li>Django在检查URL模式前，移除每一个申请的URL开头的斜杠(<i>)。这意味着我们为/hello/写URL模式不用包含前面的斜杠(</i>);任何不匹配或尾部没有斜杠(/)的申请URL，将被重定向至尾部包含斜杠的相同字眼的URL。（这是受配置文件setting中APPEND<sub>SLASH项控制的</sub>.
+</li>
+<li>访问<a href="http://127.0.0.1:8000/time">http://127.0.0.1:8000/time</a> 会发现时间是不对的，那是因为django的时区设置有问题，修改setting.py的时区,TIME<sub>ZONE</sub> = "Asia/Shanghai"
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-3-1-3" class="outline-4">
+<h4 id="sec-3-1-3"><span class="section-number-4">3.1.3</span> 常用到的正则表达式</h4>
+<div class="outline-text-4" id="text-3-1-3">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">符号</th><th scope="col" class="left">匹配</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">.(dot)</td><td class="left">任意单个字符</td></tr>
+<tr><td class="left">\d</td><td class="left">任意一位数字</td></tr>
+<tr><td class="left">[A-Z]</td><td class="left">A 到 Z中任意一个字符（大写）</td></tr>
+<tr><td class="left">[a-z]</td><td class="left">a 到 z中任意一个字符（小写）</td></tr>
+<tr><td class="left">[A-Za-z]</td><td class="left">a 到 z中任意一个字符（不区分大小写）</td></tr>
+<tr><td class="left">+</td><td class="left">匹配一个或更多 (例如, \d+ 匹配一个或 多个数字字符)</td></tr>
+<tr><td class="left">[^/]+</td><td class="left">一个或多个不为'/'的字符</td></tr>
+<tr><td class="left">?</td><td class="left">零个或一个之前的表达式（例如：\d? 匹配零个或一个数字）</td></tr>
+<tr><td class="left">*</td><td class="left">匹配0个或更多 (例如, \d* 匹配0个 或更多数字字符)</td></tr>
+<tr><td class="left">{1,3}</td><td class="left">介于一个和三个（包含）之前的表达式（例如，\d{1,3}匹配一个或两个或三个数字）</td></tr>
+</tbody>
+</table>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> django处理请求的工作机制</h3>
+<div class="outline-text-3" id="text-3-2">
+
+<ol>
+<li>用manage.py runserver 启动Django服务器时就载入了在同一目录下的settings.py。该文件包含了项目中的配置信息，如前面将的URLConf等，其中最重要的配置就是ROOT<sub>URLCONF，它告诉Django哪个Python模块应该用作本站的URLConf</sub>,默认的是urls.py
+</li>
+<li>当访问url的时候，Django会根据ROOT<sub>URLCONF的设置来装载URLConf。</sub>
+</li>
+<li>然后按顺序逐个匹配URLConf里的URLpatterns。如果找到则会调用相关联的视图函数，并把HttpRequest对象作为第一个参数(通常是request)
+</li>
+<li>最后该view函数负责返回一个HttpResponse对象，
+</li>
+</ol>
+
+
+<img src ="/images/2013-12/django_work.png"/>
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 更进一步：动态url</h3>
+<div class="outline-text-3" id="text-3-3">
+
+<p>接下来深入一下url的映射，实现动态的url。
+</p>
+<p>
+我们要做到就是在url后输入一些参数，从而实现不同的调用内容（如在url后输入数字(小时)来显示当前时间累加后的时间，如当前时间是6:20,在浏览器中输入&hellip;.time/plus/3,则显示9:20）的小实例
+</p>
+<p>
+这里使用带通配符的URL匹配模式。本例中用\d+匹配一个或多个数字.
+</p>
+<p>
+urls.py
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">from</span> django.conf.urls.defaults <span style="color: #859900;">import</span> *
+<span style="color: #859900;">from</span> mysite.views <span style="color: #859900;">import</span> current_datetime, hours_ahead
+
+<span style="color: #268bd2;">urlpatterns</span> = patterns(<span style="color: #2aa198;">''</span>,
+    (r<span style="color: #2aa198;">'^time/$'</span>, current_datetime),
+    (r<span style="color: #2aa198;">'^time/plus/(\d+)/$'</span>,hours_ahead), <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">[1]&#19981;&#21152;()&#20250;&#25253;&#38169;</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">(r'^time/plus/(\d{1,2})/$', hours_ahead), #&#38480;&#21046;&#26368;&#22823;99</span>
+)
+</pre>
+
+<ol>
+<li>我们想要把这些数字作为参数，用圆括号把\d+或\d{1,2}包围起来,正则表达式也是用圆括号来从文本里提取数据的
+</li>
+</ol>
+
+<p>views.py
+</p>
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: utf-8 -*-</span>
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20174;django.http&#27169;&#22359;&#20013;&#23548;&#20837;HttpResponse&#31867;</span>
+<span style="color: #859900;">from</span> django.http <span style="color: #859900;">import</span> HttpResponse
+<span style="color: #859900;">import</span> datetime
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">current_datetime</span>(request):
+    <span style="color: #268bd2;">now</span>=datetime.datetime.now()
+    <span style="color: #268bd2;">html</span>=<span style="color: #2aa198;">"&lt;html&gt;&lt;body&gt;&#29616;&#22312;&#26102;&#21051;&#65306;%s.&lt;/body&gt;&lt;/html&gt;"</span> %now
+    <span style="color: #859900;">return</span> HttpResponse(html)
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">hours_ahead</span>(request,offset): <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">[1]</span>
+    <span style="color: #859900;">try</span>:
+        <span style="color: #268bd2;">offset</span>=<span style="color: #859900;">int</span>(offset)
+    <span style="color: #859900;">except</span> <span style="color: #b58900;">ValueError</span>:
+        <span style="color: #859900;">raise</span> Http404()
+    <span style="color: #268bd2;">dt</span>=datetime.datetime.now()+datetime.timedelta(hours=offset)
+    <span style="color: #268bd2;">html</span>=<span style="color: #2aa198;">"&lt;html&gt;&lt;body&gt;In %s hours it will be %s.&lt;/body&gt;&lt;/html&gt;"</span> %(offset,dt)
+    <span style="color: #859900;">return</span> HttpResponse(html)
+</pre>
+
+<ol>
+<li>hours<sub>ahead有两个参数</sub>,offset是从匹配的URL中提取出来的.注意：捕获值永远都是字符串（string）类型，而不会是整数（integer）类型,这个函数做的第一件事就是将字符串转换为整数。如果在一个不能转换为整数的值上调用int()，pyhon将抛出ValueError异常，最终显示404页面.
+</li>
+</ol>
+
+<p>test
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 模板</h2>
+<div class="outline-text-2" id="text-4">
+
+
+</div>
+
+<div id="outline-container-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 介绍</h3>
+<div class="outline-text-3" id="text-4-1">
+
+<p>前面的例子中是将HTML硬编码在python代码中，Django内建有一个简单有强大的模板处理引擎来让你分离两种工作：设计HTML页面和编写Python代码。
+</p>
+</div>
+
+<div id="outline-container-4-1-1" class="outline-4">
+<h4 id="sec-4-1-1"><span class="section-number-4">4.1.1</span> 模板组织形式</h4>
+<div class="outline-text-4" id="text-4-1-1">
+
+<p>模板是一个文本，用于分离文档的表现形式和内容。 模板定义了占位符以及各种用于规范文档该如何显示的各部分基本逻辑（模板标签）。模板通常用于产生 HTML，但是Django的模板也能产生任何基于文本格式的文档。下面的模板描述了一个致谢的HTML页面。
+</p>
+
+
+<pre class="src src-html">&lt;<span style="color: #268bd2;">html</span>&gt;
+&lt;<span style="color: #268bd2;">head</span>&gt;&lt;<span style="color: #268bd2;">title</span>&gt;<span style="font-weight: bold; text-decoration: underline;">&#26631;&#39064;</span>&lt;/<span style="color: #268bd2;">title</span>&gt;&lt;/<span style="color: #268bd2;">head</span>&gt;
+&lt;<span style="color: #268bd2;">body</span>&gt;
+&lt;<span style="color: #268bd2;">p</span>&gt;Dear {{ person_name }},&lt;/<span style="color: #268bd2;">p</span>&gt;
+&lt;<span style="color: #268bd2;">p</span>&gt;Thanks for placing an order from {{ company }}. It's scheduled to
+ship on {{ ship_date|date:<span style="color: #2aa198;">"F j, Y"</span> }}.&lt;/<span style="color: #268bd2;">p</span>&gt;
+&lt;<span style="color: #268bd2;">p</span>&gt;Here are the items you've ordered:&lt;/<span style="color: #268bd2;">p</span>&gt;
+&lt;<span style="color: #268bd2;">ul</span>&gt;
+{% for item in item_list %}
+&lt;<span style="color: #268bd2;">li</span>&gt;{{ item }}&lt;/<span style="color: #268bd2;">li</span>&gt;
+{% endfor %}
+&lt;/<span style="color: #268bd2;">ul</span>&gt;
+{% if ordered_warranty %}
+&lt;<span style="color: #268bd2;">p</span>&gt;Your warranty information will be included in the packaging.&lt;/<span style="color: #268bd2;">p</span>&gt;
+{% endif %}
+&lt;<span style="color: #268bd2;">p</span>&gt;Sincerely,&lt;<span style="color: #268bd2;">br</span> /&gt;{{ company }}&lt;/<span style="color: #268bd2;">p</span>&gt;
+&lt;/<span style="color: #268bd2;">body</span>&gt;
+&lt;/<span style="color: #268bd2;">html</span>&gt;
+</pre>
+
+<p>
+其中：{{ xxx }}是模板变量,{% xxx %}是模板标签,{{ xxx|xxx:&hellip; }}是过滤器. <br/>
+这个例子中的{{ ship<sub>date|date</sub>:"F j, Y" }}，我们将变量ship<sub>date传递给date过滤器，同时指定参数”F</sub> j,Y”。date过滤器根据参数进行格式输出。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-1-2" class="outline-4">
+<h4 id="sec-4-1-2"><span class="section-number-4">4.1.2</span> 常用模板标签</h4>
+<div class="outline-text-4" id="text-4-1-2">
+
+
+</div>
+
+<div id="outline-container-4-1-2-1" class="outline-5">
+<h5 id="sec-4-1-2-1"><span class="section-number-5">4.1.2.1</span> if/else</h5>
+<div class="outline-text-5" id="text-4-1-2-1">
+
+
+
+
+<pre class="src src-python">{% <span style="color: #859900;">if</span> today_is_weekend %}
+    &lt;p&gt;Welcome~&lt;/p&gt;
+{%<span style="color: #859900;">else</span> %}
+    &lt;p&gt;NO!&lt;/p&gt;
+{% endif %}
+</pre>
+
+<p>
+{% if %}标签检查today<sub>is</sub><sub>weekend值是否为True。如果是，模板系统将显示</sub>{% if today<sub>is</sub><sub>weekend</sub> %}和{% else %}之间的内容；否则将显示{% else %}和{% endif %}之间的内容。 <br/>
+{% else %}是可选的.
+</p>
+<p>
+python中空列表，空元组，空字典，空字符串，0，None,False的布尔值是False,其它视为True.
+</p>
+<p>
+{% if %}还可以与and、or、not一起使用，判断一个或多个变量，或者取反(not)
+</p>
+<p>
+注意：
+</p><ol>
+<li>不允许同时使用and、or,多次使用一个逻辑操作符是可以的。
+</li>
+<li>不支持圆括号来组合比较操作
+</li>
+<li>没有{% elif %}标签，可以用桥讨{% if %}来表达。
+</li>
+<li>每一个{% if %}标签要对应{% endif %}关闭标签,否则django会抛出TemplateSyntaxError。
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-2-2" class="outline-5">
+<h5 id="sec-4-1-2-2"><span class="section-number-5">4.1.2.2</span> for</h5>
+<div class="outline-text-5" id="text-4-1-2-2">
+
+
+
+
+<pre class="src src-python">&lt;ul&gt;
+{% <span style="color: #859900;">for</span> person <span style="color: #859900;">in</span> Person_list %}
+    &lt;li&gt;{{ person.name }}&lt;/li&gt;
+{% endfor %}
+&lt;/ul&gt;
+</pre>
+
+<p>
+注意：
+</p><ol>
+<li>我们也能够嵌套for
+</li>
+<li>Django不支持退出循环，不支持continue
+</li>
+<li>{% for %}标签内置了一个forloop模板变量，它含有一些属性提供循环的信息：
+</li>
+<li>forloop.counter表示循环的次数，它从1开始计数，第一次循环设为1
+</li>
+<li>forloop.counter0类似于forloop.counter，但它是从0开始计数，第一次循环设为0
+</li>
+<li>forloop.revcounter表示循环中剩下的items数量，第一次循环时设为items总数，最后一次设为1
+</li>
+<li>forloop.revcounter0类似于forloop.revcounter，第一次循环时设为items总数减一，最后一次循环时为0
+</li>
+<li>orloop.first当第一次循环时值为True，在特别情况下很有用：
+
+
+
+<pre class="src src-python">{% <span style="color: #859900;">for</span> <span style="color: #859900;">object</span> <span style="color: #859900;">in</span> objects %}
+    {% <span style="color: #859900;">if</span> forloop.first %}&lt;li <span style="color: #859900;">class</span>=<span style="color: #2aa198;">"first"</span>&gt;{% <span style="color: #859900;">else</span> %}&lt;li&gt;{% endif %}
+    {{ <span style="color: #859900;">object</span> }}
+    &lt;/li&gt;
+{% endfor %}
+</pre>
+
+</li>
+<li>forloop.last当最后一次循环时值为True
+</li>
+<li>forloop.parentloop在嵌套循环中表示父循环的forloop：
+</li>
+<li>forloop只能在循环中使用，解析器碰到{% endfor %}，就不能再访问了。
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-2-3" class="outline-5">
+<h5 id="sec-4-1-2-3"><span class="section-number-5">4.1.2.3</span> ifequal/ifnotequal</h5>
+<div class="outline-text-5" id="text-4-1-2-3">
+
+<p>{% ifequal %}比较两个值，如果相等，则显示{% ifequal %}和{% endifequal %}之间的所有内容：
+</p>
+
+
+<pre class="src src-python">{% ifequal a b %}
+    &lt;h1&gt;Welcome!a <span style="color: #859900;">and</span> b&lt;/h1&gt;
+{% endifequal %}
+</pre>
+
+<p>
+注意：
+</p><ol>
+<li>{% ifequal %}标签支持{% else %},这一点不再累述
+</li>
+<li>模板变量，字符串，整数和小数都可以作为{% ifequal %}的参数
+</li>
+<li>其它的Python类型，如字典、列表或布尔类型不能硬编码在{% ifequal %}里面
+</li>
+<li>如果你需要测试某个变量是true或false，用{% if %}即可
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-2-4" class="outline-5">
+<h5 id="sec-4-1-2-4"><span class="section-number-5">4.1.2.4</span> block</h5>
+<div class="outline-text-5" id="text-4-1-2-4">
+
+<p>定义了一个被子模块覆盖的区块，在模板继承知识点可深入
+</p></div>
+
+</div>
+
+<div id="outline-container-4-1-2-5" class="outline-5">
+<h5 id="sec-4-1-2-5"><span class="section-number-5">4.1.2.5</span> comment</h5>
+<div class="outline-text-5" id="text-4-1-2-5">
+
+<p>模板引擎会忽略掉{% comment %}&hellip;{% endcomment %}之间的内容,多行注释
+</p></div>
+
+</div>
+
+<div id="outline-container-4-1-2-6" class="outline-5">
+<h5 id="sec-4-1-2-6"><span class="section-number-5">4.1.2.6</span> extends</h5>
+<div class="outline-text-5" id="text-4-1-2-6">
+
+<p>标记当前模板扩展一个父模板
+</p>
+<p>
+其他的模板标签可以在以后的章节中详细学习，也可在django 官方文档中查阅
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-4-1-3" class="outline-4">
+<h4 id="sec-4-1-3"><span class="section-number-4">4.1.3</span> 模板注释</h4>
+<div class="outline-text-4" id="text-4-1-3">
+
+<p>Django模板语言允许注释{# #}，模板渲染时注释不会输出，一个注释不能分成多行
+</p>
+
+
+<pre class="src src-python">{<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">This is a comment #}</span>
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-4" class="outline-4">
+<h4 id="sec-4-1-4"><span class="section-number-4">4.1.4</span> 过滤器</h4>
+<div class="outline-text-4" id="text-4-1-4">
+
+
+</div>
+
+<div id="outline-container-4-1-4-1" class="outline-5">
+<h5 id="sec-4-1-4-1"><span class="section-number-5">4.1.4.1</span> 简介</h5>
+<div class="outline-text-5" id="text-4-1-4-1">
+
+<ol>
+<li>模板过滤器是一种便捷的转换变量输出格式的方式，通过(|)管道来申请一个过滤器，
+   如姓名转换成小写：
+
+
+
+<pre class="src src-python">{{ name|lower }}
+</pre>
+
+</li>
+<li>过滤器可以串成链，即一个过滤器的结果可以传向下一个
+
+
+
+<pre class="src src-python">{{ my_text|escape|linebreaks }}<span style="background-color: #ffd700;">  </span>
+</pre>
+
+</li>
+<li>有些过滤器需要参数，参数跟随冒号之后，使用双引号包含，如显示变量bio的前30个字，
+
+
+
+<pre class="src src-python">{{ bio|truncatewords:<span style="color: #2aa198;">"30"</span> }}<span style="background-color: #ffd700;"> </span>
+</pre>
+
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-1-4-2" class="outline-5">
+<h5 id="sec-4-1-4-2"><span class="section-number-5">4.1.4.2</span> 常用过滤器</h5>
+<div class="outline-text-5" id="text-4-1-4-2">
+
+<p><a href="http://doudoubear11.blog.163.com/blog/static/301262432011618103643135/">django模板-过滤器</a> <br/>
+<a href="http://blog.csdn.net/yima1006/article/details/7201199">Django基础-过滤器</a>  
+</p></div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 解析器中直接使用模板</h3>
+<div class="outline-text-3" id="text-4-2">
+
+<p>先直接用解释器，看看模板系统是如何独立工作的。
+</p>
+</div>
+
+<div id="outline-container-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1"><span class="section-number-4">4.2.1</span> Template的使用方式</h4>
+<div class="outline-text-4" id="text-4-2-1">
+
+<p>在Python代码中使用Django模板的最基本方式如下：
+</p><ol>
+<li>用原始的模板代码字符串创建一个Template对象，Django同样支持用指定模板文件路径的方式来创建Template对象;
+</li>
+<li>调用模板对象的render方法，并且传入一套变量context。它将返回一个基于模板的展现字符串，模板中的变量和标签会被context值替换。
+</li>
+</ol>
+
+<p>示例代码：
+</p>
+
+
+<pre class="src src-python">python manage.py shell <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">1</span>
+&gt;&gt;&gt; <span style="color: #859900;">from</span> django <span style="color: #859900;">import</span> template  <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">2</span>
+&gt;&gt;&gt; <span style="color: #268bd2;">t</span> = template.Template(<span style="color: #2aa198;">'My name is {{ name }}.'</span>) <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">3</span>
+&gt;&gt;&gt; <span style="color: #268bd2;">c</span> = template.Context({<span style="color: #2aa198;">'name'</span>: <span style="color: #2aa198;">'Andy'</span>})  <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">4</span>
+&gt;&gt;&gt; t.render(c) <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">5</span>
+u<span style="color: #2aa198;">'My name is Andy.'</span> <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">6</span>
+&gt;&gt;&gt; <span style="color: #859900;">print</span> t.render(c)
+My name <span style="color: #859900;">is</span> Andy.
+&gt;&gt;&gt; <span style="color: #859900;">print</span> t.render(Context({<span style="color: #2aa198;">'name'</span>: <span style="color: #2aa198;">'May'</span>})) <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">7</span>
+My name <span style="color: #859900;">is</span> May.
+</pre>
+
+<ol>
+<li>模板系统依赖配置文件，这种方式启动解释器会自动处理环境变量。或者用python/ipython启动解释器，先&gt;&gt;&gt;from django.conf import settings &gt;&gt;&gt;settings.configure()
+</li>
+<li>导入模块
+</li>
+<li>创建Template对象.Template类就在django.template模块中，构造函数接受一个参数，原始模板代码。
+</li>
+<li>用context给Template对象传递数据。一个context是一系列变量和它们值的集合。
+   context在Django里表现为Context类,在django.template模块里。Contffext类的构造函数带有一个可选的参数：一个字典映射变量和它们的值.
+</li>
+<li>调用Template对象的render()方法并传递context来填充模板(渲染)
+</li>
+<li>t.render(c)返回的值是一个Unicode对象，不是普通的Python字符串
+</li>
+<li>使用同一模板可以渲染多个context，只进行一次模板创建然后多次调用render()方法。
+</li>
+</ol>
+
+<p>使用Django模板系统的基本规则：写模板，创建Template对象，创建Context，调用render()方法。Template构造函数参数是字符串，Context为字典。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-2-2" class="outline-4">
+<h4 id="sec-4-2-2"><span class="section-number-4">4.2.2</span> 句点进行深度变量查找</h4>
+<div class="outline-text-4" id="text-4-2-2">
+
+<p>模板系统能够非常简洁地处理复杂的数据结构，例如list、dictionary和自定义的对象。使用句点(.)遍历复杂的数据结构。
+</p>
+<p>
+句点查找规则：
+</p><ol>
+<li>字典类型查找 （比如 foo["bar"])
+</li>
+<li>属性查找 (比如 foo.bar)
+</li>
+<li>方法调用 （比如 foo.bar()）
+</li>
+<li>列表类型索引查找 (比如 foo[bar]),不允许负数列表索引。
+</li>
+</ol>
+
+<p>句点查找可以多级深度嵌套。
+</p>
+
+
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #859900;">from</span> django.template <span style="color: #859900;">import</span> Template, Context
+&gt;&gt;&gt; <span style="color: #268bd2;">person</span> = {<span style="color: #2aa198;">'name'</span>: <span style="color: #2aa198;">'Andy'</span>, <span style="color: #2aa198;">'age'</span>: <span style="color: #2aa198;">'18'</span>}
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#35843;&#29992;&#23383;&#31526;&#20018;&#30340;upper()&#20989;&#25968;&#65292;&#27880;&#24847;&#27809;&#26377;()</span>
+&gt;&gt;&gt; <span style="color: #268bd2;">t</span> = Template(<span style="color: #2aa198;">'{{ person.name.upper }} is {{ person.age }} years old.'</span>)<span style="background-color: #ffd700;"> </span>
+&gt;&gt;&gt; <span style="color: #268bd2;">c</span> = Context({<span style="color: #2aa198;">'person'</span>: person})
+&gt;&gt;&gt; <span style="color: #859900;">print</span> t.render(c)
+ANDY <span style="color: #859900;">is</span> 18 years old.
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-2-3" class="outline-4">
+<h4 id="sec-4-2-3"><span class="section-number-4">4.2.3</span> 方法调用行为</h4>
+<div class="outline-text-4" id="text-4-2-3">
+
+<ol>
+<li>在方法查找过程中，如果某方法抛出一个异常,如果该异常有silent<sub>variable</sub><sub>failure属性并且值为True，则模板里的指定变量会被置为空字符串</sub>
+</li>
+<li>Django模板中的方法调用仅限于那些没有参数的方法，找不到这样的函数就会移动到下一步的查找(即列表索引查找)
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-2-4" class="outline-4">
+<h4 id="sec-4-2-4"><span class="section-number-4">4.2.4</span> 无效变量</h4>
+<div class="outline-text-4" id="text-4-2-4">
+
+<p>默认情况，如果一个变量不存在，模板系统会将其展示为空字符串。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-2-5" class="outline-4">
+<h4 id="sec-4-2-5"><span class="section-number-4">4.2.5</span> Context对象</h4>
+<div class="outline-text-4" id="text-4-2-5">
+
+<p>Context对象的初始化参数是字典，可以用标准的python语法操作。
+</p></div>
+</div>
+
+</div>
+
+<div id="outline-container-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 在视图中使用模板</h3>
+<div class="outline-text-3" id="text-4-3">
+
+<p>通过在解析器中直接使用模板已经了解了模板系统的基础知识。下面将模板系统与视图结合起来。
+</p>
+<p>
+我们将模板置于一个单独的文件中，并用视图来加载，解决模板直接嵌入在python代码中的问题。
+实现数据与表现的分离。
+</p>
+</div>
+
+<div id="outline-container-4-3-1" class="outline-4">
+<h4 id="sec-4-3-1"><span class="section-number-4">4.3.1</span> 定义templates目录</h4>
+<div class="outline-text-4" id="text-4-3-1">
+
+<p>修改settings.py,配置templates目录
+</p>
+
+
+<pre class="src src-python"><span style="color: #268bd2;">TEMPLATE_DIRS</span> = (
+    <span style="color: #2aa198;">'/home/wchunx/mysite/mysite/templates'</span>,
+</pre>
+
+<ol>
+<li>可以指定任何目录，只要那个目录下的目录和模板对于你的Web服务器运行时的用户是可读的
+</li>
+</ol>
+
+<p>如果你找不到一个放置模板的位置，推荐在Django工程目录下创建一个templates目录
+</p><ol>
+<li>不要忘了模板目录最后的逗号，Python需要逗号来区分单元素元组和括号括起来的语句,如果你想避免这个错误，可以用列表来替代元组，单元素列表不需要结尾的逗号;元组比列表略微高效，所以我们推荐使用元组
+</li>
+<li>使用绝对路径很简单，如果你想更灵活和松耦合，你可利用Django的settings文件是简单的Python代码
+</li>
+</ol>
+
+
+
+
+<pre class="src src-python"><span style="color: #859900;">import</span> os.path
+
+<span style="color: #268bd2;">TEMPLATE_DIRS</span> = (
+    os.path.join(os.path.dirname(__file__), <span style="color: #2aa198;">'templates'</span>).replace(<span style="color: #2aa198;">'\\'</span>,<span style="color: #2aa198;">'/'</span>),
+)
+</pre>
+
+<p>
+Python内部变量 _<sub>file</sub>_<sub>被自动设置为代码所在的Python模块文件名</sub>
+</p></div>
+
+</div>
+
+<div id="outline-container-4-3-2" class="outline-4">
+<h4 id="sec-4-3-2"><span class="section-number-4">4.3.2</span> 编写template文件</h4>
+<div class="outline-text-4" id="text-4-3-2">
+
+<p>项目目录mysite下创建templates文件夹，创建current<sub>datetime</sub>.html
+</p>
+
+
+<pre class="src src-html">&lt;<span style="color: #268bd2;">html</span>&gt;&lt;<span style="color: #268bd2;">body</span>&gt;It is now {{ current_date }}.&lt;/<span style="color: #268bd2;">body</span>&gt;&lt;/<span style="color: #268bd2;">html</span>&gt;
+</pre>
+
+<p>
+模板文件是current<sub>datetime</sub>.html，但这个与.html后缀没有直接的联系。你可以选择任意后缀的任意文件，只要是符合逻辑的都行。甚至选择没有后缀的文件也不会有问题。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-3-3" class="outline-4">
+<h4 id="sec-4-3-3"><span class="section-number-4">4.3.3</span> 编写视图函数</h4>
+<div class="outline-text-4" id="text-4-3-3">
+
+
+
+
+<pre class="src src-python"><span style="color: #859900;">from</span> django.template.loader <span style="color: #859900;">import</span> get_template
+<span style="color: #859900;">from</span> django.template <span style="color: #859900;">import</span> Context
+<span style="color: #859900;">from</span> django.http <span style="color: #859900;">import</span> HttpResponse
+<span style="color: #859900;">import</span> datetime
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26368;&#21021;&#30340;&#35270;&#22270;&#20989;&#25968;</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">def current_datetime(request):</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">now=datetime.datetime.now()</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">html="&lt;html&gt;&lt;body&gt;&#29616;&#22312;&#26102;&#21051;&#65306;%s.&lt;/body&gt;&lt;/html&gt;" %now</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">return HttpResponse(html)</span>
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20351;&#29992;django&#27169;&#26495;&#26469;&#20462;&#25913;&#35813;&#35270;&#22270;&#20989;&#25968;</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">def current_datetime(request):</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">now=datetime.datetime.now()</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">t=Template('&lt;html&gt;&lt;body&gt;&#29616;&#22312;&#26102;&#21051;&#26159;:{{current_date}}&lt;/body&gt;&lt;/html&gt;')</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">c=Context({'current_date':now})</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">html=t.render(c)</span>
+<span style="color: #586e75; font-style: italic;">#    </span><span style="color: #586e75; font-style: italic;">return HttpResponse(html)</span>
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20351;&#29992;&#21152;&#36733;&#27169;&#26495;&#26469;&#20462;&#25913;&#35270;&#22270;&#20989;&#25968;</span>
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">current_datetime</span>(request):
+    <span style="color: #268bd2;">now</span> = datetime.datetime.now()
+    <span style="color: #268bd2;">t</span> = get_template(<span style="color: #2aa198;">'current_datetime.html'</span>)
+    <span style="color: #268bd2;">html</span> = t.render(Context({<span style="color: #2aa198;">'current_date'</span>: now}))
+    <span style="color: #859900;">return</span> HttpResponse(html)
+</pre>
+
+<p>
+使用了函数django.template.loader.get<sub>template</sub>()加载模板文件，该get<sub>template</sub>()函数以模板名称为参数，在文件系统中找处模块的位置，打开文件并返回一个编译好的Template对象 <br/>
+get<sub>template</sub>()方法会自动连接已经设置的TEMPLATE<sub>DIRS目录和传入的模板名称参数。</sub>
+</p></div>
+
+</div>
+
+<div id="outline-container-4-3-4" class="outline-4">
+<h4 id="sec-4-3-4"><span class="section-number-4">4.3.4</span> 简化流程</h4>
+<div class="outline-text-4" id="text-4-3-4">
+
+<p>Django提供了一个捷径来使用一行代码完成载入模板，填充Context，渲染模板，返回HttpResponse对象的工作，这就是render<sub>to</sub><sub>response</sub>()，它在django.shortcuts模块下。大部分情况下，你都会使用render<sub>to</sub><sub>response</sub>()而不是手动完成上述的事情
+</p>
+<p>
+使用render<sub>to</sub><sub>response</sub>()重写current<sub>datetime</sub>
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">from</span> django.shortcuts <span style="color: #859900;">import</span> render_to_response <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">import</span>
+<span style="color: #859900;">import</span> datetime
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20351;&#29992;render_to_response&#20248;&#21270;&#22788;&#29702;</span>
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">current_datetime</span>(request):
+    <span style="color: #268bd2;">now</span>=datetime.datetime.now()
+    <span style="color: #859900;">return</span> render_to_response(<span style="color: #2aa198;">'current_datetime.html'</span>,{<span style="color: #2aa198;">"current_date"</span>:now})
+</pre>
+
+<ol>
+<li>我们不再需要导入get<sub>template、</sub> Template 、Context和HttpResponse 。相反，我们导入django.shortcuts.render<sub>to</sub><sub>response</sub> 。import datetime 继续保留。
+</li>
+<li>在current<sub>datetime</sub> 函数中，我们仍然进行now计算，但模板加载、创建Context、模板渲染和HttpResponse创建工作均在对render<sub>to</sub><sub>response</sub>()的调用中完成了
+</li>
+<li>render<sub>to</sub><sub>response</sub>()的第一个参数应该是使用的模板名，对应到模板目录的相对路径,第二个参数如果有的话应该是一个用来创建Context的字典，如果不提供第二个参数，render<sub>to</sub><sub>response</sub>()将使用一个空的字典。
+</li>
+<li>render<sub>to</sub><sub>response返回HttpResponse对象</sub>,所以我们return之。
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3-5" class="outline-4">
+<h4 id="sec-4-3-5"><span class="section-number-4">4.3.5</span> locals()技巧</h4>
+<div class="outline-text-4" id="text-4-3-5">
+
+<p>像上面的，计算一些值后存储在局部变量中(例如now)并传递给模板,懒程序员可能会觉得有点繁琐，既要给临时变量取名又要给模板变量取名这不仅仅是冗余，还是过度输入,如果你很懒或者你想保持代码整洁，可以使用Python内建的locals()方法
+</p>
+<p>
+locals()返回了函数执行到该时间点时所定义的一切变量和它们的值的字典，上面的代码可以重写：
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">current_datetime</span>(request):
+    <span style="color: #268bd2;">current_date</span> = datetime.datetime.now()
+    <span style="color: #859900;">return</span> render_to_response(<span style="color: #2aa198;">'current_datetime.html'</span>, <span style="color: #859900;">locals</span>())
+</pre>
+
+<p>
+1.这里我们传递locals()的值而不是手动指定context字典，我们把now变量重命名为current<sub>date，因为模板需要的</sub>({{ current<sub>date</sub> }})是这个变量名。这个例子中locals()不会给你太大改善，但这个技术可以帮你少敲键盘。
+</p><ol>
+<li>使用locals()需要注意的是它包含了所有当前变量，可能包括比你的模板想访问的更多,上面的例子中，locals()也包括request变量，这依赖于你的程序。
+</li>
+<li>最后要注意的是locals()导致了一点点开销，因为Python不得不动态创建字典，如果你手动指定context字典则可以避免这项开销。
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3-6" class="outline-4">
+<h4 id="sec-4-3-6"><span class="section-number-4">4.3.6</span> 模板子目录</h4>
+<div class="outline-text-4" id="text-4-3-6">
+
+<p>模板存放于模板目录的子目录中是件很轻松的事情。只需在调用get<sub>template</sub>()时，把子目录名和一条斜杠添加到模板名称之前，如：
+</p>
+
+
+<pre class="src src-python"><span style="color: #268bd2;">t</span> = get_template(<span style="color: #2aa198;">'dateapp/current_datetime.html'</span>)
+</pre>
+
+<p>
+由于render<sub>to</sub><sub>response</sub>()只是对get<sub>template</sub>()的简单封装，你可以对render<sub>to</sub><sub>response</sub>()的第一个参数做相同处理。
+</p>
+
+
+<pre class="src src-python"><span style="color: #859900;">return</span> render_to_response(<span style="color: #2aa198;">'dateapp/current_datetime.html'</span>, {<span style="color: #2aa198;">'current_date'</span>: now})
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3-7" class="outline-4">
+<h4 id="sec-4-3-7"><span class="section-number-4">4.3.7</span> include模板标签</h4>
+<div class="outline-text-4" id="text-4-3-7">
+
+<p>include标签允许你引入另一个模板的内容，标签的参数是你想引入的模板的名字，名字可以是变量，也可以是单引号或双引号表示的string。每当在多个模板中出现相同的代码时，就应该考虑是否要使用{% include %}来减少重复。
+</p>
+<p>
+在get<sub>template</sub>()中一样，对模板的文件名进行判断时会在所调取的模板名称之前加上来自TEMPLATE<sub>DIRS的模板目录。</sub>
+</p>
+
+
+<pre class="src src-html">{# mypage.html #}
+&lt;<span style="color: #268bd2;">html</span>&gt;
+&lt;<span style="color: #268bd2;">body</span>&gt;
+{% include <span style="color: #2aa198;">"includes/nav.html"</span> %}
+&lt;<span style="color: #268bd2;">h1</span>&gt;<span style="font-weight: bold; text-decoration: underline;">{{ title }}</span>&lt;/<span style="color: #268bd2;">h1</span>&gt;
+&lt;/<span style="color: #268bd2;">body</span>&gt;
+&lt;/<span style="color: #268bd2;">html</span>&gt;
+</pre>
+
+
+<pre class="src src-html">{# includes/nav.html #}
+&lt;<span style="color: #268bd2;">div</span> <span style="color: #268bd2;">id</span>=<span style="color: #2aa198;">"nav"</span>&gt;
+    You are in: {{ current_section }}
+&lt;/<span style="color: #268bd2;">div</span>&gt;
+</pre>
+
+<ol>
+<li>如果被引入的模板中包含任何的模板代码，如标签和变量等，它将用父模板的context计算它们
+</li>
+<li>如果给定的模板名不存在，Django将做下面两件事情中的一件：
+<ul>
+<li>如果DEBUG设置为True，你将看到一个TemplateDoesNotExist异常的错误页面
+</li>
+<li>如果DEBUG设置为False，标签位置将什么也不显示
+</li>
+</ul>
+
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-4-3-8" class="outline-4">
+<h4 id="sec-4-3-8"><span class="section-number-4">4.3.8</span> 模板继承extends</h4>
+<div class="outline-text-4" id="text-4-3-8">
+
+<p>实际开发中，需要减少页面公共区域引起的重复和冗余代码。<br/>
+include标签可以实现，将模板的公共部分保存为不同的模板片段，然后在每个模板中include,
+更好的办法是模板继承。
+</p>
+</div>
+
+<div id="outline-container-4-3-8-1" class="outline-5">
+<h5 id="sec-4-3-8-1"><span class="section-number-5">4.3.8.1</span> 建立基础模板</h5>
+<div class="outline-text-5" id="text-4-3-8-1">
+
+<p>base.html
+</p>
+
+
+<pre class="src src-html">&lt;<span style="color: #859900;">!DOCTYPE</span> HTML PUBLIC <span style="color: #2aa198;">"-//W3C//DTD HTML 4.01//EN"</span>&gt;
+&lt;<span style="color: #268bd2;">html</span> <span style="color: #268bd2;">lang</span>=<span style="color: #2aa198;">"en"</span>&gt;
+&lt;<span style="color: #268bd2;">head</span>&gt;
+    &lt;<span style="color: #268bd2;">title</span>&gt;<span style="font-weight: bold; text-decoration: underline;">{% block title %}{% endblock %}</span>&lt;/<span style="color: #268bd2;">title</span>&gt;
+&lt;/<span style="color: #268bd2;">head</span>&gt;
+&lt;<span style="color: #268bd2;">body</span>&gt;
+    &lt;<span style="color: #268bd2;">h1</span>&gt;<span style="font-weight: bold; text-decoration: underline;">My helpful timestamp site</span>&lt;/<span style="color: #268bd2;">h1</span>&gt;
+    {% block content %}{% endblock %}
+    {% block footer %}
+    &lt;<span style="color: #268bd2;">hr</span>&gt;
+    &lt;<span style="color: #268bd2;">p</span>&gt;Thanks for visiting my site.&lt;/<span style="color: #268bd2;">p</span>&gt;
+    {% endblock %}
+&lt;/<span style="color: #268bd2;">body</span>&gt;
+&lt;/<span style="color: #268bd2;">html</span>&gt;
+</pre>
+
+<p>
+这是一个主模板(基础模板)，其他子模板的作用就是重载、继承、添加那些*块*的内容，{% block %}告诉模板引擎。子模块可以重载这部分。这个例子定义了三个字幕版要填写的block。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-3-8-2" class="outline-5">
+<h5 id="sec-4-3-8-2"><span class="section-number-5">4.3.8.2</span> 建立子模板</h5>
+<div class="outline-text-5" id="text-4-3-8-2">
+
+<p>修改current<sub>datetime</sub>.html
+</p>
+
+
+<pre class="src src-html">{% extends <span style="color: #2aa198;">"base.html"</span> %}
+
+{% block title %}The current time{% endblock %}
+
+{% block content %}
+&lt;<span style="color: #268bd2;">p</span>&gt;It is now {{ current_date }}.&lt;/<span style="color: #268bd2;">p</span>&gt;
+{% endblock %}
+</pre>
+
+<p>
+这里的{% extends %}标签是最关键的. 它告诉模板引擎这个模板 “扩展” 了另一个模板. 当模板系统要应用该模板时,首先它会去寻找父模板–在这里是 "base.html" .
+</p>
+<p>
+模板引擎会注意到在base.html里有三个block并用子模板的相关内容替换这些block.最后的输出会是这样：
+</p>
+
+
+<pre class="src src-html">&lt;<span style="color: #859900;">!DOCTYPE</span> HTML PUBLIC <span style="color: #2aa198;">"-//W3C//DTD HTML 4.01//EN"</span>&gt;
+&lt;<span style="color: #268bd2;">html</span> <span style="color: #268bd2;">lang</span>=<span style="color: #2aa198;">"en"</span>&gt;
+&lt;<span style="color: #268bd2;">head</span>&gt;
+    &lt;<span style="color: #268bd2;">title</span>&gt;<span style="font-weight: bold; text-decoration: underline;">The current time</span>&lt;/<span style="color: #268bd2;">title</span>&gt;
+&lt;/<span style="color: #268bd2;">head</span>&gt;
+&lt;<span style="color: #268bd2;">body</span>&gt;
+    &lt;<span style="color: #268bd2;">h1</span>&gt;<span style="font-weight: bold; text-decoration: underline;">My helpful timestamp site</span>&lt;/<span style="color: #268bd2;">h1</span>&gt;
+    &lt;<span style="color: #268bd2;">p</span>&gt;It is now {{ current_date }}.&lt;/<span style="color: #268bd2;">p</span>&gt;
+    &lt;<span style="color: #268bd2;">hr</span>&gt;
+    &lt;<span style="color: #268bd2;">p</span>&gt;Thanks for visiting my site.&lt;/<span style="color: #268bd2;">p</span>&gt;
+&lt;/<span style="color: #268bd2;">body</span>&gt;
+&lt;/<span style="color: #268bd2;">html</span>&gt;
+</pre>
+
+<p>
+title和content被替换，由于字幕版没有定义footer块，模板系统就使用父模板中
+定义的值。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-3-8-3" class="outline-5">
+<h5 id="sec-4-3-8-3"><span class="section-number-5">4.3.8.3</span> 模板继承层次</h5>
+<div class="outline-text-5" id="text-4-3-8-3">
+
+<p>对模板的继承层数,Django未做任何限制. 常用的一种模板继承方法是如下的三层:
+</p><ol>
+<li>创建一个base.html模板，用它表现站点主要的外观。
+</li>
+<li>为站点的每个section创建一个base<sub>SECTIONNAME</sub>.html模板。比如base<sub>photos</sub>.html,base<sub>forum</sub>.html等等，这些模板扩充了base.html并包括section特有的样式和设计。
+</li>
+<li>为每种类型的页面创建一个独立的模板，比如一篇新闻稿或者一个博客，这些模板扩展了相应的section模板。
+</li>
+</ol>
+
+<p>这种方式能够最大程度的重用代码并能很容易的扩充内容及共享内容区块，比如section-范围的导航。
+</p></div>
+
+</div>
+
+<div id="outline-container-4-3-8-4" class="outline-5">
+<h5 id="sec-4-3-8-4"><span class="section-number-5">4.3.8.4</span> 模板使用技巧</h5>
+<div class="outline-text-5" id="text-4-3-8-4">
+
+<ol>
+<li>如果你在模板中使用了{% extends %},那么它必须是这个模板中的第一个模板tag，否则模板继承不起作用。
+</li>
+<li>在父模板中{% block %}标签虽然不是越多越好,但总得来说多比少好. 记住,子模板不需要定义所有的parent block, 因此你可以先定义一系列blocks并填入合理的默认值, 然后定义那些你以后才需要的block. It's better to have more hooks than fewer hooks.
+
+</li>
+<li>如果发现在一堆模板文件中重复定义相同的内容, 就意味着需要将这些内容放到父模板的某个{% block%}中去.
+
+</li>
+<li>如果你需要在子模板中引用父模板中的block的内容,使用{{ block.super }}变量.在子模板中重写block会把父模板中的该block内容全部覆盖，如果想保留父模板的内容，就可以调用super.如下面的例子，{{ block.supper }}也会把父模板footer的内容加入。
+
+
+
+<pre class="src src-html">{% extends <span style="color: #2aa198;">"base.html"</span> %}
+
+{% block title %}The current time{% endblock %}
+
+{% block content %}
+&lt;<span style="color: #268bd2;">p</span>&gt;It is now {{ current_date }}.&lt;/<span style="color: #268bd2;">p</span>&gt;
+{% endblock %}
+{% block footer %}
+&lt;<span style="color: #268bd2;">hr</span>&gt;
+&lt;<span style="color: #268bd2;">p</span>&gt;This is the end of footer.&lt;/<span style="color: #268bd2;">p</span>&gt;
+{{ block.super }}
+{% endblock %}
+</pre>
+
+</li>
+<li>不能在同一个模板文件中定义多个相同名字的 {% block %} 标签.父子模板中的block应该一一对应。
+</li>
+<li>{% extends %}对所传入模板名称使用的加载方法和get<sub>template</sub>()相同。也就是说，模板路径基于TEMPLATE<sub>DIRS。</sub>
+</li>
+<li>extends的参数一般为字符串，也可为变量。
+</li>
+</ol>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-10T09:54+0800.</p> 
+</div>
+</body>
+</html>

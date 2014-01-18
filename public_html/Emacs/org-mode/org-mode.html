@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>org-mode语法</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="org-mode语法"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-14 20:46"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../../css/org.css" rel="stylesheet" type="text/css">
+<link href="../../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">org-mode语法</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 大纲</a>
+<ul>
+<li><a href="#sec-1-1">1.1 标题</a></li>
+<li><a href="#sec-1-2">1.2 大纲相关快捷键</a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1 折叠</a></li>
+<li><a href="#sec-1-2-2">1.2.2 移动</a></li>
+<li><a href="#sec-1-2-3">1.2.3 编辑</a></li>
+<li><a href="#sec-1-2-4">1.2.4 缩进</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 链接</a></li>
+<li><a href="#sec-3">3 标记语言</a>
+<ul>
+<li><a href="#sec-3-1">3.1 字体</a></li>
+<li><a href="#sec-3-2">3.2 段落</a></li>
+<li><a href="#sec-3-3">3.3 表格</a>
+<ul>
+<li><a href="#sec-3-3-1">3.3.1 常用快捷键</a>
+<ul>
+<li><a href="#sec-3-3-1-1">3.3.1.1 创建</a></li>
+<li><a href="#sec-3-3-1-2">3.3.1.2 移动</a></li>
+<li><a href="#sec-3-3-1-3">3.3.1.3 编辑</a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-3-4">3.4 列表</a>
+<ul>
+<li><a href="#sec-3-4-1">3.4.1 列表快捷键</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-5">3.5 分隔线</a></li>
+<li><a href="#sec-3-6">3.6 语法块常用语言格式</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 参考</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 大纲</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>Org-mode天然支持大纲视图，通过在文档中定义标题，可以方便的浏览每个小节，从而把握文档的总体内容。
+</p>
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 标题</h3>
+<div class="outline-text-3" id="text-1-1">
+
+<p>正文中的标题用*标记，位于行首,*之后要有一个空格，然后再输入标题文字，连续几个*就表示是第几级标题，最多支持10级。
+<!-- more -->
+</p></div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> 大纲相关快捷键</h3>
+<div class="outline-text-3" id="text-1-2">
+
+
+</div>
+
+<div id="outline-container-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> 折叠</h4>
+<div class="outline-text-4" id="text-1-2-1">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">S-TAB</th><th scope="col" class="left">循环切换整个文档的大纲状态（三种状态：折叠，打开下一级，打开全部）</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">TAB</td><td class="left">循环切换光标所在大纲的状态</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> 移动</h4>
+<div class="outline-text-4" id="text-1-2-2">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">C-c C-n/p</th><th scope="col" class="left">下/上一标题</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">C-c C-f/b</td><td class="left">下/上一标题（仅限同级标题）</td></tr>
+<tr><td class="left">C-c C-u</td><td class="left">跳到上一级标题</td></tr>
+<tr><td class="left">C-c C-j</td><td class="left">切换到大纲浏览状态</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> 编辑</h4>
+<div class="outline-text-4" id="text-1-2-3">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">M-RET</th><th scope="col" class="left">插入一个同级标题</th><th scope="col" class="left"></th><th scope="col" class="left"></th></tr>
+</thead>
+<tbody>
+<tr><td class="left">M-S-RET</td><td class="left">插入一个同级TODO 标题</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">M-LEFT/RIGHT</td><td class="left">将当前标题升/降级</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">M-S-LEFT/RIGHT</td><td class="left">将子树升/降级</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">M-S-UP/DOWN</td><td class="left">将子树上/下移,即交换子树顺序</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">C-c *</td><td class="left">将本行设为标题/正文</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">C-c C-w</td><td class="left">将子树或区域移动到另一标题处（跨缓冲区）</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">C-x n s/w</td><td class="left">只显示当前子树/返回</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">C-c C-x b</td><td class="left">在新缓冲区显示当前分支（类似C-x n s)</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">C-c /</td><td class="left">只列出包含搜索结果的大纲，并高亮，支持多种搜索方式</td><td class="left"></td><td class="left"></td></tr>
+<tr><td class="left">C-c C-c</td><td class="left">取消高亮</td><td class="left"></td><td class="left"></td></tr>
+</tbody>
+</table>
+
+更多的快捷键可以通过C-c C-x C-h查看。
+</div>
+
+</div>
+
+<div id="outline-container-1-2-4" class="outline-4">
+<h4 id="sec-1-2-4"><span class="section-number-4">1.2.4</span> 缩进</h4>
+<div class="outline-text-4" id="text-1-2-4">
+
+<p>M-x org-indent-mode切换是否缩进。某个文件缩进模式打开，头部加 #+STARTUP: indent，所有org文件以缩进模式打开，init.el加
+</p>
+
+
+<pre class="src src-elisp">(setq org-startup-indented t)
+</pre>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 链接</h2>
+<div class="outline-text-2" id="text-2">
+
+<ol>
+<li>符合链接规则的内容，org-mode会自动将其视为链接
+</li>
+<li>文件链接，用::后面增加定位符的方式链接到文件的特定位置，定位符可以是行号或搜索选项，如：
+
+
+
+<pre class="src src-sh">file:~/code/main.c::255                     &#36827;&#20837;&#21040; 255 &#34892;
+file:~/xx.org::My Target                    &#25214;&#21040;&#30446;&#26631;&#8216;&lt;&lt;My Target&gt;&gt;&#8217;
+<span style="color: #ffff00; font-weight: bold;">file:~/xx.org/::#my-custom-id               &#26597;&#25214;&#33258;&#23450;&#20041; id &#30340;&#39033;</span>
+</pre>
+
+</li>
+<li>指定链接
+
+
+
+<pre class="src src-sh">[[link][description]]
+[[link]]
+</pre>
+
+</li>
+</ol>
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 标记语言</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>标记语言的对比，<a href="http://www.worldhello.net/gotgithub/appendix/markups.html">看这里</a>
+</p>
+</div>
+
+<div id="outline-container-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> 字体</h3>
+<div class="outline-text-3" id="text-3-1">
+
+
+
+
+<pre class="src src-sh">*&#31895;&#20307;*
+/&#26012;&#20307;/
++&#21024;&#38500;&#32447;+
+_&#19979;&#21010;&#32447;_
+&#19979;&#26631;&#65306; H_2 O (&#36825;&#37324;&#24517;&#39035;&#30041;&#19968;&#20010;&#31354;&#26684;&#35201;&#19981;&#28982;2&#21644;O&#37117;&#25104;&#20026;&#23567;&#26631;&#65292;&#30446;&#21069;&#36824;&#19981;&#30693;&#36947;&#24590;&#20040;&#21435;&#25481;&#31354;&#26684;)
+&#19978;&#26631;&#65306; <span style="color: #268bd2;">E</span>=mc^2
+&#31561;&#23485;&#23383;&#65306;  =<span style="color: #268bd2;">git</span>= &#25110;&#32773; ~git~
+</pre>
+
+<p>
+<b>粗体</b> <i>斜体</i> <del>删除线</del> <span style="text-decoration:underline;">下划线</span> H<sub>2</sub>O E=mc<sup>2</sup> <code>git</code>
+</p></div>
+
+</div>
+
+<div id="outline-container-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> 段落</h3>
+<div class="outline-text-3" id="text-3-2">
+
+<p>对于单个回车换行的文本，认为其属于同一个段落。在导出的时候将会转化为不换行的同一段。如果要新起一个段落需要回车两次，还有一种方法就是在需要换行的地方输入\\。
+两种显示结果是不同的。
+</p>
+<p>
+org-mode编辑的时候默认没有自动换行，可以在init.el加下面的一句实现自动换行。
+</p>
+
+
+<pre class="src src-elisp">(add-hook 'org-mode-hook (<span style="color: #859900;">lambda</span> () (setq truncate-lines nil)))
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> 表格</h3>
+<div class="outline-text-3" id="text-3-3">
+
+<p>org可以很方便的处理表格,任何以'|'为首个非空字符的行都会被认为是表格的一部分。'|'也是列分隔符。一个表格是下面的样子：
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="right" /><col class="right" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">Name</th><th scope="col" class="right">Pone</th><th scope="col" class="right">Age</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">Peter</td><td class="right">123</td><td class="right">18</td></tr>
+<tr><td class="left">Anna</td><td class="right">234</td><td class="right">19</td></tr>
+</tbody>
+</table>
+
+只需要输入表头“|Name|Pone|Age”之后，按C-c RET,就可以生成整个表格的结构。
+
+</div>
+
+<div id="outline-container-3-3-1" class="outline-4">
+<h4 id="sec-3-3-1"><span class="section-number-4">3.3.1</span> 常用快捷键</h4>
+<div class="outline-text-4" id="text-3-3-1">
+
+
+</div>
+
+<div id="outline-container-3-3-1-1" class="outline-5">
+<h5 id="sec-3-3-1-1"><span class="section-number-5">3.3.1.1</span> 创建</h5>
+<div class="outline-text-5" id="text-3-3-1-1">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<tbody>
+<tr><td class="left">C-c 竖线</td><td class="left">创建或转换表格(提示列x行)</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+<div id="outline-container-3-3-1-2" class="outline-5">
+<h5 id="sec-3-3-1-2"><span class="section-number-5">3.3.1.2</span> 移动</h5>
+<div class="outline-text-5" id="text-3-3-1-2">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<tbody>
+<tr><td class="left">TAB</td><td class="left">移动到下一区域，必要时新建一行</td></tr>
+<tr><td class="left">S-TAB</td><td class="left">移动到上一区域</td></tr>
+<tr><td class="left">RET</td><td class="left">移动到下一行，必要时新建一行</td></tr>
+<tr><td class="left">C-c C-c</td><td class="left">自动调整表格</td></tr>
+</tbody>
+</table>
+
+</div>
+
+</div>
+
+<div id="outline-container-3-3-1-3" class="outline-5">
+<h5 id="sec-3-3-1-3"><span class="section-number-5">3.3.1.3</span> 编辑</h5>
+<div class="outline-text-5" id="text-3-3-1-3">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<tbody>
+<tr><td class="left">M-LEFT/RIGHT</td><td class="left">移动列</td></tr>
+<tr><td class="left">M-UP/DOWN</td><td class="left">移动行</td></tr>
+<tr><td class="left">M-S-LEFT/RIGHT</td><td class="left">删除/插入列</td></tr>
+<tr><td class="left">M-S-UP/DOWN</td><td class="left">删除/插入行</td></tr>
+<tr><td class="left">C-c -</td><td class="left">添加水平分割线</td></tr>
+<tr><td class="left">C-c RET</td><td class="left">添加水平分割线并跳到下一行</td></tr>
+<tr><td class="left">C-c ^</td><td class="left">根据当前列排序，可以选择排序方式</td></tr>
+</tbody>
+</table>
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> 列表</h3>
+<div class="outline-text-3" id="text-3-4">
+
+<ol>
+<li>有序列表、无序列表和描述列表。
+<ul>
+<li>无序列表以'-'、'+'或者'*'开头
+</li>
+<li>有序列表以'1.'或者'1)'开头
+</li>
+<li>描述列表用'::'
+</li>
+</ul>
+
+</li>
+<li>注意事项
+<ul>
+<li>列表符号后面都要有空格
+</li>
+<li>同级别的列表缩进要相同
+</li>
+<li>如果想要加入同级别的列表，可以 M-RET
+</li>
+<li>空两行之后列表结束
+</li>
+</ul>
+
+</li>
+</ol>
+
+
+
+
+</div>
+
+<div id="outline-container-3-4-1" class="outline-4">
+<h4 id="sec-3-4-1"><span class="section-number-4">3.4.1</span> 列表快捷键</h4>
+<div class="outline-text-4" id="text-3-4-1">
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">TAB</th><th scope="col" class="left">折叠列表项</th><th scope="col" class="left"></th></tr>
+</thead>
+<tbody>
+<tr><td class="left">M-RET</td><td class="left">插入项</td><td class="left"></td></tr>
+<tr><td class="left">M-S-RET</td><td class="left">插入带复选框的项</td><td class="left"></td></tr>
+<tr><td class="left">M-S-UP/DOWN</td><td class="left">移动列表项</td><td class="left"></td></tr>
+<tr><td class="left">M-LEFT/RIGHT</td><td class="left">升/降级列表项，不包括子项</td><td class="left"></td></tr>
+<tr><td class="left">M-S-LEFT/RIGTH</td><td class="left">升/降级列表项，包括子项</td><td class="left"></td></tr>
+<tr><td class="left">C-c C-c</td><td class="left">改变复选框状态</td><td class="left"></td></tr>
+<tr><td class="left">C-c -</td><td class="left">更换列表标记（循环切换）</td><td class="left"></td></tr>
+</tbody>
+</table>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> 分隔线</h3>
+<div class="outline-text-3" id="text-3-5">
+
+<p>五条短线或以上显示为分隔线。
+</p>
+
+
+<pre class="src src-sh">-----
+</pre>
+
+
+<hr/>
+</div>
+
+</div>
+
+<div id="outline-container-3-6" class="outline-3">
+<h3 id="sec-3-6"><span class="section-number-3">3.6</span> 语法块常用语言格式</h3>
+<div class="outline-text-3" id="text-3-6">
+
+<p>参考<a href="http://www.gnu.org/software/emacs/manual/html_node/org/Structure-of-code-blocks.html">Structure of code blocks</a>
+</p><table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+<colgroup><col class="left" /><col class="left" />
+</colgroup>
+<thead>
+<tr><th scope="col" class="left">Language</th><th scope="col" class="left">Identifier</th></tr>
+</thead>
+<tbody>
+<tr><td class="left">Awk</td><td class="left">awk</td></tr>
+<tr><td class="left">C</td><td class="left">C</td></tr>
+<tr><td class="left">C++</td><td class="left">C++</td></tr>
+<tr><td class="left">Clojure</td><td class="left">clojure</td></tr>
+<tr><td class="left">CSS</td><td class="left">css</td></tr>
+<tr><td class="left">ditaa</td><td class="left">ditaa</td></tr>
+<tr><td class="left">Graphviz</td><td class="left">dot</td></tr>
+<tr><td class="left">Emacs Lisp</td><td class="left">emacs-lisp</td></tr>
+<tr><td class="left">Java</td><td class="left">java</td></tr>
+<tr><td class="left">Javascript</td><td class="left">js</td></tr>
+<tr><td class="left">LaTex</td><td class="left">latex</td></tr>
+<tr><td class="left">MATLAT</td><td class="left">matlab</td></tr>
+<tr><td class="left">Org mode</td><td class="left">org</td></tr>
+<tr><td class="left">Python</td><td class="left">python</td></tr>
+<tr><td class="left">Scheme</td><td class="left">scheme</td></tr>
+<tr><td class="left">shell</td><td class="left">sh</td></tr>
+<tr><td class="left">SQL</td><td class="left">sql</td></tr>
+<tr><td class="left">SQLite</td><td class="left">sqlite</td></tr>
+</tbody>
+</table>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 参考</h2>
+<div class="outline-text-2" id="text-4">
+
+<p><a href="http://www.cnblogs.com/qlwy/archive/2012/06/15/2551034.html#sec-4-2">神器中的神器org-mode之入门篇</a> <br/>
+<a href="http://www.cnblogs.com/holbrook/archive/2012/04/12/2444992.html">Emacs学习笔记(9):org-mode，最好的文档编辑利器，没有之一</a> <br/>
+<a href="http://www.cnblogs.com/waterlin/archive/2011/10/09/2203996.html">转义问题</a>
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-14 20:46.</p> 
+</div>
+</body>
+</html>

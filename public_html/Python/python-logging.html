@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>python logging模块</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="python logging模块"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-16 14:08"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">python logging模块</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 简单用法</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 简单用法</h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+<pre class="src src-python"><span style="color: #859900;">import</span> logging
+logging.basicConfig(filename=<span style="color: #2aa198;">'/tmp/app.log'</span>, level=logging.INFO,
+                    <span style="color: #859900;">format</span>=<span style="color: #2aa198;">'%(asctime)s %(levelname)s %(message)s'</span>)
+logging.info(<span style="color: #2aa198;">'run'</span>)
+
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">result</span>
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">2010-04-10 17:45:09,173 INFO run</span>
+</pre>
+
+
+
+<pre class="src src-python"><span style="color: #268bd2;">logger</span> = logging.getLogger(<span style="color: #2aa198;">"main"</span>)
+<span style="color: #268bd2;">formatter</span> = logging.Formatter(<span style="color: #2aa198;">'%(name)s %(asctime)s %(message)s'</span>)
+<span style="color: #268bd2;">file_handler</span> = logging.FileHandler(<span style="color: #2aa198;">'/tmp/test.log'</span>)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+logger.error(<span style="color: #2aa198;">'begin to register'</span>)
+
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">result</span>
+<span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">main 2014-01-16 14:07:03,453 begin to register</span>
+</pre>
+
+</div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-16 14:08.</p> 
+</div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+TITLE: python logging模块
+#+DATE: 2014-01-16 14:08
+#+OPTIONS: ^:{}
+
+* 简单用法
+#+BEGIN_SRC python
+import logging
+logging.basicConfig(filename='/tmp/app.log', level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s')
+logging.info('run')
+
+# result
+# 2010-04-10 17:45:09,173 INFO run
+#+END_SRC
+
+#+BEGIN_SRC python
+logger = logging.getLogger("main")
+formatter = logging.Formatter('%(name)s %(asctime)s %(message)s')
+file_handler = logging.FileHandler('/tmp/test.log')
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+
+logger.error('begin to register')
+
+# result
+# main 2014-01-16 14:07:03,453 begin to register
+#+END_SRC

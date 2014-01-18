@@ -1,0 +1,124 @@
+#+SETUPFILE: ../../css/level-2.orgcss
+#+TITLE: 使用org-mode导出功能建立博客
+#+DATE: 2013-12-31 15:52
+#+OPTIONS: ^:{}
+* 博客目录
+: ~/blog/
+:    |- www/
+:    |    |- css/
+:    |    |    `-org.css
+:    |    |    `-level-0.orgcss
+:    |    |- static/
+:    |    |- index.org
+:    |    |- sitemap.org
+:    |- public_html/
+:    |    |- server.py
++ www目录为org源文件目录
++ public_html为html文件到处目录
+* init.el配置文件
+加入如下内容
+#+BEGIN_SRC emacs-lisp
+(require 'org-publish)
+(setq org-publish-project-alist
+;notes组件
+'((
+     "org-notes"
+     :base-directory "~/blog/www/" ;设置存放.org文件位置
+     :base-extension "org" ;仅处理 .org 格式文件
+     :publishing-directory "~/blog/public_html/" ;导出html文件位置
+    ;:publishing-directory "/ssh:user@server" ;export to server
+     :recursive t
+     :publishing-function org-publish-org-to-html
+     :headline-levels 4 ;Just the default for this project.
+     :auto-preamble t
+     :html-postamble t
+     :auto-sitemap t                  ;自动生成 sitemap.org
+     :sitemap-filename "sitemap0.org"  ;名称为sitemap.org(默认)
+     :sitemap-title "Archive"         ;标题Sitemap
+     :export-creator-info nil    ;禁止在 postamble 显示"Created by Org"
+     :export-author-info nil     ;禁止在 postamble 显示 "Author: Your Name"
+     :auto-postamble nil
+     :table-of-contents t      ;t生成文章目录,禁止为nil
+     :section-numbers t        ;t段落标题前使用数字，禁止为nil
+     :html-postamble "    <p class=\"postamble\">Last Updated %d.</p> "
+     :style-include-default nil  ;禁用默认 css 样式,使用自定义css
+    )
+;;static 组件
+    ("org-static"
+     :base-directory "~/blog/www/"
+     :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+     :publishing-directory "~/blog/public_html/"
+     :recursive t
+     :publishing-function org-publish-attachment
+     )
+;;publish 组件
+    ("org" :components ("org-notes" "org-static"))
+))
+
+#每次发布询问是否重新发布全部内容
+(defun publish-project (project no-cache)
+(interactive "sName of project: \nsNo-cache?[y/n] ")
+(if (or (string= no-cache "y")
+        (string= no-cache "Y"))
+    (setq org-publish-use-timestamps-flag nil))
+(org-publish-project project)
+(setq org-publish-use-timestamps-flag t))
+#+END_SRC
+* 生成站点
+www目录下创建sitemap.org
+#+BEGIN_SRC sh
+TITLE: Archive
+SETUPFILE: css/level-0.orgcss
+INCLUDE: sitemap0.org
+#+END_SRC
+TITLE,SETUPFILE,INCLUDE前都有#+
+
+发布时自动生成的sitemap0.html是没有css的，手动创建sitemap.org,并将sitemap0.org
+包含进来，生成的sitemap.html有css，并有完整的sitemap内容。
+
+用M-x org-publist-project或M-x publish-projcet选择org项目发布，用浏览器打开public_html下的index.html或sitemap.html查看站点.
+* 启动服务
+可以在public_html手动起SimpleHTTPServer
+#+BEGIN_SRC sh
+python -m SimpleHTTPServer 1000
+#+END_SRC
+即可在1000端口运行web服务，也就可以在非本机访问博客了。
+
+为了方便，在public_html目录下创建server.py
+#+BEGIN_SRC python
+import SimpleHTTPServer
+import SocketServer
+import cgi
+
+host = ''
+port = 8080
+
+class simpleHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    def do_POST(self):
+        try:
+            form = cgi.FieldStorage(
+                                    fp = self.rfile,
+                                    headers = self.headers,
+                                    environ = {
+                                               'REQUEST_METHOD':'POST',
+                                               'CONTENT_TYPE':self.headers.getheader('current-type')
+                                               }
+                                    )
+
+            print form
+
+        except IOError:
+            self.send_error(404, ' POST error');
+
+conn = SocketServer.TCPServer((host, port), simpleHandler)
+
+print 'start server at port:', port
+
+conn.serve_forever()
+#+END_SRC
+直接python server.py即可启动服务。
+* 参考
+[[http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.html][Publishing Org-mode files to HTML]] \\
+[[http://www.personal.psu.edu/nus173/sitecreation.html][How to Create This Site]] \\
+[[http://www.dbrunner.de/it/org-mode.html][好文，介绍sitemap的css和导航]] \\
+[[http://thomasf.github.io/solarized-css/][Solarized CSS]]

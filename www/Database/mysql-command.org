@@ -1,0 +1,158 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+TITLE: Mysql常用命令
+#+DATE: 2014-01-14 20:42
+#+OPTIONS: ^:{}
+
+* 连接
+#+BEGIN_SRC sh
+#需安装mysql-client
+mysql -h主机地址 -u用户名 -p密码
+#或者
+mysql -u 用户名 -p #回车后输入密码
+#+END_SRC
+* 大小写问题
+sql语句命令不区别大小写的。一些人习惯把关键词大写出来显示，方便阅读
+1. mysql在linux下数据库名、表名、列名、别名大小写规则如下
+    + 数据库名与表名是严格区分大小写的
+    + 表的别名是严格区分大小写的
+    + 列名与列的别名在所有的情况下均是忽略大小写的
+    + 变量名严格区分大小写
+2. mysql在windows下都不区分大小写
+
+
+* 修改密码
+** 终端修改
+刚装好mysql，root用户没有密码
+#+BEGIN_SRC sh
+#初始设密码
+mysqladmin -uroot password 123456
+#改密
+mysqladmin -uroot -p旧密码 password #回车输入新密码
+#+END_SRC
+** mysql命令行中修改密码
+#+BEGIN_SRC sh
+mysql> UPDATE mysql.user SET password=PASSWORD('新密码') WHERE User=’root’;
+mysql> FLUSH PRIVILEGES;
+#+END_SRC
+* 忘记root密码解决办法
+** 修改mysql登录设置
+修改/etc/mysql/my.cnf,[mysqld]的段中加上一句：skip-grant-tables，例如：
+#+BEGIN_SRC sh
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+skip-grant-tables
+#+END_SRC
+** 重启mysql
+#+BEGIN_SRC sh
+/etc/init.d/mysql restart
+#+END_SRC
+** 登录mysql修改密码
+这时候登录mysql已经不需要密码了，修改密码即可。
+#+BEGIN_SRC sh
+mysql> UPDATE mysql.user SET password=PASSWORD('123456') WHERE User='root';
+mysql> FLUSH PRIVILEGES;
+#+END_SRC
+** 将mysql登录设置修改回来
+去掉my.cnf添加的skip-grant-tables，重启mysql
+* 用户操作
+** 添加用户
+创建用户并赋予权限的命令
+mysql> grant 权限1,权限2,…权限n on 数据库名称.表名称 to 用户名@用户地址 identified by '连接口令';
+
++ 权限1,权限2,…权限n代表select,insert,update,delete,create,drop,index,alter,grant,references,reload,shutdown,process,file等14个权限。
++ 当权限1,权限2,…权限n被all privileges或者all代替，表示赋予用户全部权限。
++ 当数据库名称.表名称被*.*代替，表示赋予用户操作服务器上所有数据库所有表的权限。
++ 用户地址可以是localhost，也可以是ip地址、机器名字、域名。也可以用'%'表示从任何地址连接。
++ '连接口令'不能为空，否则创建失败。
+例如：创建用户test1，只能本地登录，并可对vm_db数据库进行查询，插入,修改和删除操作
+#+BEGIN_SRC sh
+mysql>grant select,insert,update,drop vm_db.* to test1@localhost identified by 'test1'
+#如果不想test1有密码，可以在打一个命令将密码取消
+mysql>grant select,insert,update,drop vm_db.* to test1@localhost identified by ''
+#刷新系统权限表
+mysql>flush privileges;
+#+END_SRC
+** 取消权限
+取消test1的删除权限
+#+BEGIN_SRC sh
+mysql> REVOKE DELETE on vm_db.* from test1@'localhost';
+#+END_SRC
+** 修改指定用户密码
+#+BEGIN_SRC sh
+mysql>update mysql.user set password=password('新密码') where User="test1" and Host="localhost";
+mysql>flush privileges;
+#+END_SRC
+** 删除用户
+root身份登录数据库后
+#+BEGIN_SRC sh
+mysql>use mysql;
+mysql>DELETE FROM user WHERE User="test1" and Host="localhost";
+mysql>flush privileges;
+#+END_SRC
+* 常用命令
+** 增、删、改、查
+#+BEGIN_SRC sh
+#查询时间
+mysql>select now();
+#查询用户
+mysql>select user();
+#查询数据库版本
+mysql>select version();
+#查询当前数据库
+mysql>select database();
+
+mysql>show databases;
+#删除数据库
+mysql>drop database if exists vm_db;
+#创建数据库
+mysql>create database if not exists vm_db;
+mysql>use vm_db;
+mysql>show tables;
+mysql>create table if not exists vms(name varchar(20), id int);
+#插入数据
+mysql>insert into vms values('vm1', 1)
+#更新数据
+mysql>update vms set name='vm0' where id=1;
+#复制表机构
+mysql>create table vms1 select * from vms where 1<>1;
+#复制完整表
+mysql>create table vms2 select * from vms;
+#表重命名
+mysql>alter table vms rename as vms0;
+#显示表结构
+mysql>describe vms0;
+#显示表记录
+mysql>select * from vms0;
+#清空表记录
+mysql>delete from vms0;
+#删除表
+#mysql>drop table if exists vms0;
+
+#+END_SRC
+** 备份
+#+BEGIN_SRC sh
+#备份MySQL数据库的命令
+mysqldump -hhostname -uusername -ppassword databasename > backupfile.sql
+#备份MySQL数据库为带删除表的格式，能够让该备份覆盖已有数据库而不需要手动删除原有数据库。
+mysqldump -–add-drop-table -uusername -ppassword databasename > backupfile.sql
+#直接将MySQL数据库压缩备份
+mysqldump -hhostname -uusername -ppassword databasename | gzip > backupfile.sql.gz
+#备份MySQL数据库某个(些)表
+mysqldump -hhostname -uusername -ppassword databasename specific_table1 specific_table2 > backupfile.sql
+#同时备份多个MySQL数据库
+mysqldump -hhostname -uusername -ppassword --databases databasename1 databasename2 databasename3 > multibackupfile.sql
+#仅仅备份数据库结构
+mysqldump -hhostname -uusername -ppassword --no-data --databases databasename1 databasename2 databasename3 > structurebackupfile.sql
+#备份服务器上所有数据库
+mysqldump --all-databases > allbackupfile.sql
+#还原MySQL数据库的命令
+mysql -hhostname -uusername -ppassword databasename < backupfile.sql
+#还原压缩的MySQL数据库
+gunzip < backupfile.sql.gz | mysql -uusername -ppassword databasename
+#将数据库转移到新服务器
+mysqldump -uusername -ppassword databasename | mysql --host=*.*.*.* -C databasename
+#+END_SRC
+* 参考
+[[http://www.cnblogs.com/jyginger/archive/2011/04/27/2030017.html][修改mysql用户密码]] \\
+[[http://gsion.blog.163.com/blog/static/1230565042011413112323446/?suggestedreading&wumii][MySQL基础命令]]

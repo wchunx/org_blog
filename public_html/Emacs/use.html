@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Emacs使用问题</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Emacs使用问题"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-16 08:55"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Emacs使用问题</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 batch模式下的语法高亮</a>
+<ul>
+<li><a href="#sec-1-1">1.1 参考my-htmlize.el</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> batch模式下的语法高亮</h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+<pre class="src src-elisp"><span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">org-mode M-x org-version&#26597;&#30475;&#29256;&#26412;</span>
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">(setq load-path (cons "~/.emacs.d/plugins/org-8.2.4/lisp" load-path))</span>
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">(require 'org-install)</span>
+
+(load-file <span style="color: #2aa198;">"~/testemacs/htmlize.el"</span>)
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">(require 'htmlize)</span>
+
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">(setq org-export-htmlize-output-type 'css)</span>
+
+<span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Source file: http://www.dd.chalmers.se/~bojohan/emacs/lisp/my-htmlize.el</span>
+<span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Output:      http://www.dd.chalmers.se/~bojohan/emacs/out.html</span>
+
+<span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Make sure the the htmlize library is in load-path.</span>
+<span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">You might want to load ~/.emacs</span>
+
+<span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">USAGE:</span>
+<span style="color: #586e75; font-style: italic;">;;     </span><span style="color: #586e75; font-style: italic;">emacs -batch -l my-htmlize.el INFILE &gt; OUTFILE</span>
+
+
+<span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Example:</span>
+(custom-set-faces
+ '(default                      ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"#ffffff"</span> <span style="color: #859900;">:background</span> <span style="color: #2aa198;">"black"</span>))))
+ '(font-lock-builtin-face       ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"#ff0000"</span>))))
+ '(font-lock-comment-face       ((t (<span style="color: #859900;">:bold</span> t <span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"#333300"</span>))))
+ '(font-lock-constant-face      ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"magenta"</span>))))
+ '(font-lock-function-name-face ((t (<span style="color: #859900;">:bold</span> t <span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"Blue"</span>))))
+ '(font-lock-keyword-face       ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"yellow3"</span>))))
+ '(font-lock-string-face        ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"light blue"</span>))))
+ '(font-lock-type-face          ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"green"</span>))))
+ '(font-lock-variable-name-face ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"cyan"</span> <span style="color: #859900;">:bold</span> t))))
+ '(font-lock-warning-face       ((t (<span style="color: #859900;">:foreground</span> <span style="color: #2aa198;">"red"</span> <span style="color: #859900;">:weight</span> bold)))))
+
+(setq htmlize-use-rgb-map 'force)
+(<span style="color: #859900;">require</span> '<span style="color: #2aa198;">htmlize</span>)
+
+(find-file (pop command-line-args-left))
+(font-lock-fontify-buffer)
+(<span style="color: #859900;">with-current-buffer</span> (htmlize-buffer)
+  (princ (buffer-string)))
+
+
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">org-html-publish-to-html</span>
+(<span style="color: #859900;">require</span> '<span style="color: #2aa198;">org-publish</span>)
+(setq org-publish-project-alist
+      '(
+        (<span style="color: #2aa198;">"test"</span>
+         <span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Path to your org files.</span>
+         <span style="color: #859900;">:base-directory</span> <span style="color: #2aa198;">"~/orgtest/"</span>
+         <span style="color: #859900;">:base-extension</span> <span style="color: #2aa198;">"org"</span>
+         <span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Path to your Jekyll project.</span>
+         <span style="color: #859900;">:publishing-directory</span> <span style="color: #2aa198;">"~/orgtest/"</span>
+         <span style="color: #859900;">:recursive</span> t
+         <span style="color: #859900;">:publishing-function</span> org-publish-org-to-html
+         <span style="color: #859900;">:headline-levels</span> 4
+         <span style="color: #859900;">:html-extension</span> <span style="color: #2aa198;">"html"</span>
+         <span style="color: #859900;">:body-only</span> t <span style="color: #586e75; font-style: italic;">;; </span><span style="color: #586e75; font-style: italic;">Only export section between &lt;body&gt; &lt;/body&gt;</span>
+         )
+        (<span style="color: #2aa198;">"blog-wchunx"</span> <span style="color: #859900;">:components</span> (<span style="color: #2aa198;">"test"</span>))
+        ))
+
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">emacs --batch -l ~/testemacs/init.el --eval "(progn (load-file \"~/testemacs/htmlize.el\") (require 'htmlize)) (setq org-export-htmlize-output-type 'inline-css)" -f org-publish-project</span>
+
+<span style="color: #586e75; font-style: italic;">;</span><span style="color: #586e75; font-style: italic;">emacs -batch -l /home/wchunx/test_of_nikola/plugins/orgmode/init.el --eval (nikola-html-export "/home/wchunx/test_of_nikola/posts/hello.org" "/home/wchunx/test_of_nikola/cache/posts/hello.html")</span>
+</pre>
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 参考<a href="http://sebastien.kirche.free.fr/emacs_stuff/elisp/my-htmlize.el">my-htmlize.el</a></h3>
+<div class="outline-text-3" id="text-1-1">
+
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-16 08:55.</p> 
+</div>
+</body>
+</html>

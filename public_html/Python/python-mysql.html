@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Python操作Mysql数据库</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Python操作Mysql数据库"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-01-14 20:44"/>
+<meta name="author" content="wchunx "/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+
+<link href="../css/org.css" rel="stylesheet" type="text/css">
+<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="../css/bootstrap-responsive.min.css" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+<div id="org-div-home-and-up" style="text-align:right;font-size:70%;white-space:nowrap;">
+ <a accesskey="h" href="../sitemap.html"> UP </a>
+ |
+ <a accesskey="H" href="../index.html"> HOME </a>
+</div>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Python操作Mysql数据库</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 安装mysqldb</a></li>
+<li><a href="#sec-2">2 示例</a></li>
+<li><a href="#sec-3">3 获取mysql版本</a></li>
+<li><a href="#sec-4">4 创建表并插入数据</a></li>
+<li><a href="#sec-5">5 查询</a></li>
+<li><a href="#sec-6">6 使用字典cursor取得结果集（可以使用表字段名字访问值）</a></li>
+<li><a href="#sec-7">7 更新数据</a></li>
+<li><a href="#sec-8">8 删除数据</a></li>
+<li><a href="#sec-9">9 常用函数</a></li>
+<li><a href="#sec-10">10 参考</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> 安装mysqldb</h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+<pre class="src src-sh"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">ubuntu&#19979;</span>
+sudo apt-get install python-mysqldb
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 示例</h2>
+<div class="outline-text-2" id="text-2">
+
+
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;keystone&#25968;&#25454;&#24211;user&#34920;&#65292;&#25351;&#23450;id&#30340;&#29992;&#25143;&#30340;&#29992;&#25143;&#21517;</span>
+<span style="color: #859900;">import</span> MySQLdb
+<span style="color: #859900;">import</span> MySQLdb.cursors
+
+<span style="color: #859900;">try</span>:
+    <span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'localhost'</span>, user=<span style="color: #2aa198;">'root'</span>, passwd=<span style="color: #2aa198;">'123456'</span>, port=3306, cursorclass = MySQLdb.cursors.DictCursor)
+    <span style="color: #268bd2;">cur</span> = conn.cursor()
+    con.select_db(<span style="color: #2aa198;">'keystone'</span>)
+    <span style="color: #268bd2;">sql</span> = <span style="color: #2aa198;">"select * from user where id  = '17a294a7a66c456a94c1c8a5e29eceac'"</span>
+    cur.execute(sql)
+    <span style="color: #268bd2;">result</span> = cur.fetchone()
+    <span style="color: #859900;">if</span> result != <span style="color: #2aa198;">None</span>:
+        <span style="color: #268bd2;">result</span> = result[dst]
+    cur.close()
+    con.close()
+    <span style="color: #859900;">print</span> result
+
+<span style="color: #859900;">except</span> MySQLdb.Error,e:
+    <span style="color: #859900;">print</span> <span style="color: #2aa198;">"Mysql Error"</span>
+</pre>
+
+<p>
+操作流程：导入模块，建立链接，执行sql语句，获取结果。
+</p></div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 获取mysql版本</h2>
+<div class="outline-text-2" id="text-3">
+
+
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #859900;">import</span> MySQLdb
+
+<span style="color: #859900;">try</span>:
+    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36830;&#25509;mysql&#30340;&#26041;&#27861;&#65306;connect('ip','user','password','dbname')</span>
+    <span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'localhost'</span>, user=<span style="color: #2aa198;">'root'</span>,
+        passwd=<span style="color: #2aa198;">'root'</span>, db=<span style="color: #2aa198;">'test'</span>);
+
+    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25152;&#26377;&#30340;&#26597;&#35810;&#65292;&#37117;&#22312;&#36830;&#25509;con&#30340;&#19968;&#20010;&#27169;&#22359;cursor&#19978;&#38754;&#36816;&#34892;&#30340;,&#33719;&#21462;&#25805;&#20316;&#28216;&#26631;</span>
+    <span style="color: #268bd2;">cur</span> = con.cursor()
+
+    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25191;&#34892;&#19968;&#20010;&#26597;&#35810;</span>
+    cur.execute(<span style="color: #2aa198;">"SELECT VERSION()"</span>)
+
+    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21462;&#24471;&#19978;&#20010;&#26597;&#35810;&#30340;&#32467;&#26524;&#65292;&#26159;&#21333;&#20010;&#32467;&#26524;</span>
+    <span style="color: #268bd2;">data</span> = cur.fetchone()
+    <span style="color: #859900;">print</span> <span style="color: #2aa198;">"Database version : %s "</span> % data
+<span style="color: #859900;">finally</span>:
+    <span style="color: #859900;">if</span> con:
+        <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#26080;&#35770;&#22914;&#20309;&#65292;&#36830;&#25509;&#35760;&#24471;&#20851;&#38381;</span>
+        con.close()
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> 创建表并插入数据</h2>
+<div class="outline-text-2" id="text-4">
+
+
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #859900;">import</span> MySQLdb
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36830;&#25509;&#25968;&#25454;&#24211;</span>
+<span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'192.168.60.107'</span>, user=<span style="color: #2aa198;">'root'</span>,
+        passwd=<span style="color: #2aa198;">'123456'</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;&#36830;&#25509;&#30340;cursor&#65292;&#21482;&#26377;&#33719;&#21462;&#20102;cursor&#65292;&#25105;&#20204;&#25165;&#33021;&#36827;&#34892;&#21508;&#31181;&#25805;&#20316;</span>
+<span style="color: #268bd2;">cur</span> = con.cursor()
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21019;&#24314;&#19968;&#20010;&#25968;&#25454;&#24211;vm_db</span>
+cur.execute(<span style="color: #2aa198;">"create database if not exists vm_db"</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#36827;&#20837;vm_db</span>
+con.select_db(<span style="color: #2aa198;">'vm_db'</span>);
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#21019;&#24314;&#34920;vms</span>
+cur.execute(<span style="color: #2aa198;">"create table vms(name varchar(20), id int)"</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">vms&#34920;&#25554;&#20837;&#35760;&#24405;</span>
+cur.execute(<span style="color: #2aa198;">"insert into vms values('vm1', 1)"</span>)
+cur.execute(<span style="color: #2aa198;">"insert into vms values('vm2', 2)"</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25554;&#20837;&#22810;&#26465;</span>
+<span style="color: #268bd2;">values</span>=[]
+<span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #859900;">range</span>(3, 20):
+    values.append((<span style="color: #2aa198;">'vm'</span> + <span style="color: #859900;">str</span>(i), i))
+
+cur.executemany(<span style="color: #2aa198;">'insert into vms values(%s,%s)'</span>, values)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#24517;&#39035;&#29992;con.commit()&#26469;&#25552;&#20132;&#20107;&#21153;&#65292;&#19981;&#28982;&#19981;&#33021;&#30495;&#27491;&#25554;&#20837;&#25968;&#25454;</span>
+con.commit()
+cur.close()
+con.close()
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> 查询</h2>
+<div class="outline-text-2" id="text-5">
+
+
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #859900;">import</span> MySQLdb
+
+<span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'192.168.60.107'</span>, user=<span style="color: #2aa198;">'root'</span>,
+        passwd=<span style="color: #2aa198;">'123456'</span>)
+<span style="color: #268bd2;">cur</span> = con.cursor()
+con.select_db(<span style="color: #2aa198;">'vm_db'</span>)
+<span style="color: #268bd2;">count</span> = cur.execute(<span style="color: #2aa198;">'select * from vms'</span>)
+<span style="color: #859900;">print</span> <span style="color: #2aa198;">'&#20849;&#26377; %s &#26465;&#35760;&#24405;'</span> % count
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;&#19968;&#26465;&#35760;&#24405;&#65292;&#20316;&#20026;&#20803;&#32452;&#36820;&#22238;</span>
+<span style="color: #859900;">print</span> <span style="color: #2aa198;">'&#33719;&#21462;&#19968;&#26465;&#35760;&#24405;'</span>
+<span style="color: #268bd2;">result</span> = cur.fetchone()
+<span style="color: #859900;">print</span> result
+<span style="color: #859900;">print</span> <span style="color: #2aa198;">'name:%s id:%s'</span> % result
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;5&#26465;&#35760;&#24405;&#65292;&#27880;&#24847;&#30001;&#20110;&#20043;&#21069;&#25191;&#34892;&#26377;&#20102;fetchone()&#65292;&#25152;&#20197;&#28216;&#26631;&#24050;&#32463;&#25351;&#21040;&#31532;&#20108;&#26465;&#35760;&#24405;&#20102;&#65292;&#20063;&#23601;&#26159;&#20174;&#31532;&#20108;&#26465;&#24320;&#22987;&#30340;&#25152;&#26377;&#35760;&#24405;</span>
+<span style="color: #859900;">print</span> <span style="color: #2aa198;">"&#33719;&#21462;5&#26465;&#35760;&#24405;:"</span>
+<span style="color: #268bd2;">results</span> = cur.fetchmany(5)
+<span style="color: #859900;">for</span> r <span style="color: #859900;">in</span> results:
+    <span style="color: #859900;">print</span> r
+
+<span style="color: #859900;">print</span> <span style="color: #2aa198;">"&#33719;&#21462;&#25152;&#26377;&#32467;&#26524;:"</span>
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#37325;&#32622;&#28216;&#26631;&#20301;&#32622;&#65292;0,&#20026;&#20559;&#31227;&#37327;&#65292;mode&#65309;absolute | relative,&#40664;&#35748;&#20026;relative,</span>
+cur.scroll(0, mode=<span style="color: #2aa198;">'absolute'</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;&#25152;&#26377;&#32467;&#26524;&#65292;&#23558;&#32467;&#26524;&#38598;(&#22810;&#32500;&#20803;&#32452;)&#23384;&#20837;results</span>
+<span style="color: #268bd2;">results</span> = cur.fetchall()
+<span style="color: #859900;">for</span> r <span style="color: #859900;">in</span> results:
+    <span style="color: #859900;">print</span> r
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#19981;&#25353;&#20803;&#32452;&#25171;&#21360;</span>
+cur.scroll(0, mode=<span style="color: #2aa198;">'absolute'</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#20351;&#29992;cur.rowcount&#33719;&#21462;&#32467;&#26524;&#38598;&#30340;&#26465;&#25968;</span>
+<span style="color: #268bd2;">numrows</span> = <span style="color: #859900;">int</span>(cur.rowcount)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#24490;&#29615;numrows&#27425;&#65292;&#27599;&#27425;&#21462;&#20986;&#19968;&#34892;&#25968;&#25454;</span>
+<span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #859900;">range</span>(numrows):
+    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#27599;&#27425;&#21462;&#20986;&#19968;&#34892;&#65292;&#25918;&#21040;row&#20013;&#65292;&#36825;&#26159;&#19968;&#20010;&#20803;&#32452;(id,name)</span>
+    <span style="color: #268bd2;">row</span> = cur.fetchone()
+    <span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#30452;&#25509;&#36755;&#20986;&#20004;&#20010;&#20803;&#32032;</span>
+    <span style="color: #859900;">print</span> row[0], row[1]
+
+cur.close()
+con.close()
+</pre>
+
+<ul>
+<li>numrows = int(cur.rowcount)用于获取结果集的数目
+</li>
+<li>row = cur.fetchone()每次取出一行数据，同时记录集的指针执行下一行
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> 使用字典cursor取得结果集（可以使用表字段名字访问值）</h2>
+<div class="outline-text-2" id="text-6">
+
+<p>MySQLdb实现了多种cursor类，默认的cursor以元组的形式返回数据，而字典cursor以字典形式返回数据，便于进行与字段名有关的操作。
+</p>
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #859900;">import</span> MySQLdb
+
+<span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'192.168.60.107'</span>, user=<span style="color: #2aa198;">'root'</span>,
+    passwd=<span style="color: #2aa198;">'123456'</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;&#23383;&#20856;cursor</span>
+<span style="color: #268bd2;">cur</span> = con.cursor(MySQLdb.cursors.DictCursor)
+con.select_db(<span style="color: #2aa198;">'vm_db'</span>)
+
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#33719;&#21462;&#21069;10&#26465;&#35760;&#24405;&#32467;&#26524;&#38598;&#21512;&#65292;rows&#26159;&#20803;&#32452;&#65292;&#20803;&#32032;&#26159;&#23383;&#20856;</span>
+cur.execute(<span style="color: #2aa198;">'select * from vms limit 10'</span>)
+<span style="color: #268bd2;">rows</span> = cur.fetchall()
+<span style="color: #859900;">for</span> row <span style="color: #859900;">in</span> rows:
+    <span style="color: #859900;">print</span> row[<span style="color: #2aa198;">'name'</span>], row[<span style="color: #2aa198;">'id'</span>]
+</pre>
+
+<p>
+示例代码中即是用的字典cursor
+</p></div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> 更新数据</h2>
+<div class="outline-text-2" id="text-7">
+
+
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #859900;">import</span> MySQLdb
+
+<span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'192.168.60.107'</span>, user=<span style="color: #2aa198;">'root'</span>,
+    passwd=<span style="color: #2aa198;">'123456'</span>)
+
+<span style="color: #268bd2;">cur</span> = con.cursor()
+con.select_db(<span style="color: #2aa198;">'vm_db'</span>)
+cur.execute(<span style="color: #2aa198;">"update vms set name = 'testvm' where id = '10'"</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25552;&#20132;</span>
+con.commit()
+
+cur.close()
+con.close()
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> 删除数据</h2>
+<div class="outline-text-2" id="text-8">
+
+
+
+
+<pre class="src src-python"><span style="color: #586e75; font-style: italic;"># </span><span style="color: #586e75; font-style: italic;">-*- coding: UTF-8 -*-</span>
+<span style="color: #859900;">import</span> MySQLdb
+
+<span style="color: #268bd2;">con</span> = MySQLdb.connect(host=<span style="color: #2aa198;">'192.168.60.107'</span>, user=<span style="color: #2aa198;">'root'</span>,
+    passwd=<span style="color: #2aa198;">'123456'</span>)
+
+<span style="color: #268bd2;">cur</span> = con.cursor()
+con.select_db(<span style="color: #2aa198;">'vm_db'</span>)
+cur.execute(<span style="color: #2aa198;">"delete from vms where id &gt; '10'"</span>)
+<span style="color: #586e75; font-style: italic;">#</span><span style="color: #586e75; font-style: italic;">&#25552;&#20132;</span>
+con.commit()
+
+cur.close()
+con.close()
+</pre>
+
+</div>
+
+</div>
+
+<div id="outline-container-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> 常用函数</h2>
+<div class="outline-text-2" id="text-9">
+
+<ul>
+<li>cur.fetchone() 获取下一条记录，并将游标下移一位
+</li>
+<li>cur.fetchall() 获取全部记录,游标移到最后
+</li>
+<li>cur.rowcount 获取记录条数,不受游标位置影响
+</li>
+<li>cur.fetchmany(size=None) 接收size条返回结果行
+</li>
+<li>cur.scroll(value,mode='relative') 移动指针到某一行.如果mode='relative',则表示从当前所在行移动value条,如果 mode='absolute',则表示从结果集的第一行移动value条.
+</li>
+<li>con.commit() 提交修改，不可撤销
+</li>
+<li>con.rollback() 会滚，撤销前面的所有操作(已经commit的操作无法撤销)
+</li>
+<li>con.close() 关闭连接
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> 参考</h2>
+<div class="outline-text-2" id="text-10">
+
+<p><a href="http://www.tutorialspoint.com/python/python_database_access.htm">Python MySQL Database Access(很好的手册)</a> <br/>
+<a href="http://zetcode.com/db/mysqlpython/">MySQL Python tutoril</a> <br/>
+<a href="http://www.crazyant.net/686.html">Python操作Mysql实例代码教程（查询手册）</a> <br/>
+<a href="http://www.iteye.com/topic/573092">用Python操作Mysql</a> <br/>
+<a href="http://www.cnblogs.com/rollenholt/archive/2012/05/29/2524327.html">python操作MySQL数据库</a> <br/>
+<a href="http://m114.org/python-mysqldb-return-dict/">Python MySQLdb 查询返回字典结构</a> <br/>
+<a href="http://docstore.mik.ua/orelly/weblinux2/mysql/ch10_01.htm">good book</a> <br/>
+<a href="http://www.yiibai.com/python/python_mysql.html">易百</a>
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+    <p class="postamble">Last Updated 2014-01-14 20:44.</p> 
+</div>
+</body>
+</html>

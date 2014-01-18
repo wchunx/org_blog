@@ -1,0 +1,1289 @@
+#+SETUPFILE: ../css/level-1.orgcss
+#+title: openstack havana 多节点部署
+#+DATE: 2014-01-07 10:39
+#+OPTIONS: ^:{}
+* 修改记录
+|       时间 | 内容                             |
+|------------+----------------------------------|
+| 2014.01.07 | nova.conf和l3-agent firewall配置 |
+* 部署环境
+用一台物理服务器上的三台KVM虚拟机作为部署环境 \\
+虚拟机系统为64位ubuntu-12.04.1-server系统 \\
+控制节点: eth0 192.168.60.151 eth1 172.16.0.251 \\
+网络节点: eth0 192.168.60.152 eth1 172.16.0.252 eth2 10.10.10.52 \\
+计算节点: +eth0 192.168.60.153+ eth1 172.16.0.253 eth2 10.10.10.53
+
+外部网络: 192.168.60.0/24 \\
+管理网络: 172.16.0.0/24 \\
+数据网络: 10.10.10.0/24
+
+计算节点的外网网卡不是必须的，但我需要联网安装数据包，所以加上了eth0.下图为部署结构图:
+
+[[file:../static/img/2014-01/multi-env.jpg]]
+* 控制节点
+** 主机配置
+/etc/hostname,主机名改为control
+
+/etc/hosts加入
+#+BEGIN_SRC sh
+172.16.0.251    control
+172.16.0.252    network
+172.16.0.253    compute
+#+END_SRC
+重启生效
+** 网络配置
+*** /etc/network/interfaces
+#+BEGIN_SRC sh
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+#External network
+auto eth0
+iface eth0 inet static
+address 192.168.60.151
+netmask 255.255.255.0
+gateway 192.168.60.1
+dns-nameservers 8.8.8.8
+
+#Manage network
+auto eth1
+iface eth1 inet static
+address 172.16.0.251
+netmask 255.255.255.0
+#+END_SRC
+*** 重启网络
+#+BEGIN_SRC sh
+/etc/init.d/networking restart
+#+END_SRC
+*** IP转发
+#+BEGIN_SRC sh
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+sysctl -p
+#+END_SRC
+** NTP
+#+BEGIN_SRC sh
+apt-get install ntp
+sed -i 's/server ntp.ubuntu.com/server ntp.ubuntu.com\nserver 127.127.1.0\nfudge 127.127.1.0 stratum 10/g' /etc/ntp.conf
+sudo /etc/init.d/ntp restart
+#+END_SRC
+其他节点的server都会指向控制节点
+** 安装mysql和rabbitmq
+#+BEGIN_SRC sh
+#设置mysql root用户密码为123456
+echo mysql-server-5.5 mysql-server/root_password password 123456 | debconf-set-selections
+echo mysql-server-5.5 mysql-server/root_password_again password 123456 | debconf-set-selections
+apt-get install mysql-server mysql-client python-mysqldb
+#允许外部访问mysql
+sed -i -e  "s/^\(bind-address\s*=\).*/\1 0.0.0.0/" /etc/mysql/my.cnf
+sed -i '44 i skip-name-resolve' /etc/mysql/my.cnf
+#+END_SRC
+*** 创建数据库
+数据库名称为各组件名字，密码与数据库名相同。
+#+BEGIN_SRC sh
+#进入mysql
+mysql -u root -p123456
+CREATE DATABASE keystone;
+CREATE DATABASE glance;
+CREATE DATABASE nova;
+CREATE DATABASE cinder;
+CREATE DATABASE neutron;
+CREATE DATABASE heat;
+
+GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY 'keystone';
+GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY 'glance';
+GRANT ALL PRIVILEGES ON nova.* TO 'nova'@'%' IDENTIFIED BY 'nova';
+GRANT ALL PRIVILEGES ON cinder.* TO 'cinder'@'%' IDENTIFIED BY 'cinder';
+GRANT ALL PRIVILEGES ON neutron.* TO 'neutron'@'%' IDENTIFIED BY 'neutron';
+GRANT ALL PRIVILEGES ON heat.* TO 'heat'@'%' IDENTIFIED BY 'heat';
+#+END_SRC
+#重启mysql服务
+#+BEGIN_SRC sh
+/etc/init.d/mysql restart
+#+END_SRC
+*** 安装rabbitmq
+#+BEGIN_SRC sh
+apt-get install rabbitmq-server
+#+END_SRC
+rabbitmq-server默认会创建一个用户，用户名密码均为guest，并允许任何人用guest用户和默认密码访问RabbitMQ server。
+如果需要可以修改guest密码,命令:
+#+BEGIN_SRC sh
+rabbitmqctl change_password guest NEW_PASS
+#+END_SRC
+** 添加havana源
+#+BEGIN_SRC sh
+apt-get install python-software-properties
+add-apt-repository cloud-archive:havana
+apt-get update && apt-get dist-upgrade
+#+END_SRC
+** 安装和配置Keystone
+*** 安装
+#+BEGIN_SRC sh
+apt-get install keystone
+#+END_SRC
+*** 删除默认keystone的sqlite db 文件
+#+BEGIN_SRC sh
+rm -f /var/lib/keystone/keystone.db
+#+END_SRC
+*** 配置openssl
+在keystone与OpenStack服务之间如果要使用ssl进行token认证,就需要使用到openssl
+#+BEGIN_SRC sh
+openssl rand -hex 10
+cdccc11cf024bd7de58e
+#+END_SRC
+*** 修改配置文件
+**** 修改/etc/keystone/keystone.conf
+修改[DEFAULT]admin_token值， 修改[sql]的connection.
+#+BEGIN_SRC sh
+[DEFAULT]
+admin_token = cdccc11cf024bd7de58e
+[sql]
+# The SQLAlchemy connection string used to connect to the database
+connection = mysql://keystone:keystone@172.16.0.251/keystone
+#+END_SRC
+**** 同步keystone表数据到db中并重启keystone
+#+BEGIN_SRC sh
+keystone-manage db_sync
+/etc/init.d/keystone restart
+#+END_SRC
+*** 创建tenant、user、roles
+**** 首先创建两个环境变量
+#+BEGIN_SRC sh
+export OS_SERVICE_TOKEN=cdccc11cf024bd7de58e
+export OS_SERVICE_ENDPOINT=http://172.16.0.251:35357/v2.0
+#+END_SRC
+****  创建admin和service两个租户
+#+BEGIN_SRC sh
+keystone tenant-create --name=admin --description="Admin Tenant"
+keystone tenant-create --name=service --description="Service Tenant"
+#+END_SRC
+**** 创建用户admin，密码password 
+#+BEGIN_SRC sh
+keystone user-create --name=admin --pass=password --email=admin@example.com
+#+END_SRC
+**** 创建角色admin
+#+BEGIN_SRC sh
+keystone role-create --name=admin
+#+END_SRC
+**** 关联用户、角色、租户
+#+BEGIN_SRC sh
+keystone user-role-add --user=admin --tenant=admin --role=admin
+#+END_SRC
+*** 创建Services 及 API endpoints
+首先创建一个类型为identity的keystone服务，名称为keystone：
+#+BEGIN_SRC sh
+keystone_id=$(keystone service-create --name=keystone --type=identity \
+--description="Keystone Identity Service" | awk '/ id / { print $4 }')
+#+END_SRC
+创建endpoint
+#+BEGIN_SRC sh
+keystone endpoint-create \
+--service-id=$keystone_id \
+--publicurl=http://172.16.0.251:5000/v2.0 \
+--internalurl=http://172.16.0.251:5000/v2.0 \
+--adminurl=http://172.16.0.251:35357/v2.0
+#+END_SRC
+*** 验证认证服务(Keystone)安装是否成功
+先unset之前的环境变量：
+#+BEGIN_SRC sh
+unset OS_SERVICE_TOKEN OS_SERVICE_ENDPOINT
+#+END_SRC
+创建keystonerc文件(环境变量)
+#+BEGIN_SRC sh
+cat > /root/openrc.sh << _EOF_
+export OS_USERNAME=admin
+export OS_PASSWORD=password
+export OS_TENANT_NAME=admin
+export OS_AUTH_URL=http://172.16.0.251:35357/v2.0
+_EOF_
+echo 'source /root/openrc.sh' >> /root/.bashrc
+source /root/openrc.sh
+#+END_SRC
+验证keystone是否正常
+#+BEGIN_SRC sh
+keystone token-get
+keystone user-list
+keystone role-list
+keystone tenant-list
+keystone endpoint-list
+#+END_SRC
+** 安装和配置glance
+*** 安装
+#+BEGIN_SRC sh
+apt-get install glance python-glanceclient sheepdog
+#+END_SRC
+删除 glance sqlite 文件：
+#+BEGIN_SRC sh
+rm -f /var/lib/glance/glance.sqlite
+#+END_SRC
+*** 修改glance配置文件
+修改/etc/glance/glance-api.conf
+#+BEGIN_SRC sh
+verbose = True
+debug = True
+sql_connection = mysql://glance:glance@172.16.0.251/glance
+
+notifier_strategy = rabbit
+rabbit_host = 172.16.0.251
+rabbit_password = guest
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = glance
+admin_password = glance
+
+[paste_deploy]
+flavor=keystone
+#+END_SRC
+修改/etc/glance/glance-registry.conf
+#+BEGIN_SRC sh
+verbose = True
+debug = True
+sql_connection = mysql://glance:glance@172.16.0.251/glance
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = glance
+admin_password = glance
+
+[paste_deploy]
+flavor=keystone
+#+END_SRC
+/etc/glance/glance-api-paste.ini
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory=keystoneclient.middleware.auth_token:filter_factory
+auth_host=172.16.0.251
+admin_user=glance
+admin_tenant_name=service
+admin_password=glance
+#+END_SRC
+/etc/glance/glance-registry-paste.ini
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory=keystoneclient.middleware.auth_token:filter_factory
+auth_host=172.16.0.251
+admin_user=glance
+admin_tenant_name=service
+admin_password=glance
+#+END_SRC
+*** 同步数据库
+#+BEGIN_SRC sh
+glance-manage db_sync
+#+END_SRC
+*** 创建名为glance的认证用户
+#+BEGIN_SRC sh
+keystone user-create --name=glance --pass=glance --email=glance@example.com
+keystone user-role-add --user=glance --tenant=service --role=admin
+#+END_SRC
+*** 创建service服务和endpoint
+#+BEGIN_SRC sh
+glance_id=$(keystone service-create --name=glance --type=image \
+--description="Glance Image Service" | awk '/ id / { print $4 }')
+
+keystone endpoint-create \
+--service-id=$glance_id \
+--publicurl=http://172.16.0.251:9292 \
+--internalurl=http://172.16.0.251:9292 \
+--adminurl=http://172.16.0.251:9292
+#+END_SRC
+*** 重启glance服务
+#+BEGIN_SRC sh
+service glance-registry restart
+service glance-api restart
+#+END_SRC
+*** 上传镜像
+下载测试镜像
+#+BEGIN_SRC sh
+wget http://cdn.download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img
+#+END_SRC
+上传
+#+BEGIN_SRC sh
+glance image-create --name='cirros' --is-public true --container-format bare --disk-format qcow2 < ./cirros-0.3.0-x86_64-disk.img
+#+END_SRC
+查看上传的镜像
+#+BEGIN_SRC sh
+glance image-list
+#+END_SRC
+** Block Storage (Cinder)安装
+*** 安装服务
+#+BEGIN_SRC sh
+apt-get install cinder-api cinder-scheduler
+#+END_SRC
+*** 建立一个逻辑卷卷组 cinder-volumes
+使用文件模拟分区
+#+BEGIN_SRC sh
+apt-get install cinder-volume lvm2
+
+dd if=/dev/zero of=/opt/cinder-volumes bs=1 count=0 seek=5G
+losetup /dev/loop2 /opt/cinder-volumes
+fdisk /dev/loop2
+#Type in the followings:
+n
+p
+1
+ENTER
+ENTER
+t
+8e
+w
+
+pvcreate /dev/loop2
+vgcreate cinder-volumes /dev/loop2
+
+vgs
+VG             #PV #LV #SN Attr   VSize VFree
+cinder-volumes   1   0   0 wz--n- 5.00g 5.00g
+#+END_SRC
+为防止卷组重启后失效，将下面的命令写道rc.local exit 0之前
+#+BEGIN_SRC sh
+losetup /dev/loop2 /opt/cinder-volumes
+#+END_SRC
+*** 修改配置文件
+/etc/cinder/cinder.conf，添加
+#+BEGIN_SRC sh
+sql_connection = mysql://cinder:cinder@172.16.0.251/cinder
+
+rpc_backend = cinder.openstack.common.rpc.impl_kombu
+rabbit_host = 172.16.0.251
+rabbit_port = 5672
+rabbit_userid = guest
+rabbit_password = guest
+
+control_exchange = cinder
+notification_driver = cinder.openstack.common.notifier.rpc_notifier
+#+END_SRC
+/etc/cinder/api-paste.ini
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory=keystoneclient.middleware.auth_token:filter_factory
+auth_host=172.16.0.251
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = cinder
+admin_password = cinder
+#+END_SRC
+*** 创建用户，角色，服务和endpoint
+#+BEGIN_SRC sh
+keystone user-create --name=cinder --pass=cinder --email=cinder@example.com
+keystone user-role-add --user=cinder --tenant=service --role=admin
+
+cinder_id1=$(keystone service-create --name=cinder --type=volume \
+--description="Cinder Volume Service" | awk '/ id / { print $4 }')
+keystone endpoint-create \
+--service-id=$cinder_id1 \
+--publicurl=http://172.16.0.251:8776/v1/%\(tenant_id\)s \
+--internalurl=http://172.16.0.251:8776/v1/%\(tenant_id\)s \
+--adminurl=http://172.16.0.251:8776/v1/%\(tenant_id\)s
+
+cinder_id2=$(keystone service-create --name=cinder --type=volumev2 \
+--description="Cinder Volume Service V2" | awk '/ id / { print $4 }')
+keystone endpoint-create \
+--service-id=$cinder_id2 \
+--publicurl=http://172.16.0.251:8776/v2/%\(tenant_id\)s \
+--internalurl=http://172.16.0.251:8776/v2/%\(tenant_id\)s \
+--adminurl=http://172.16.0.251:8776/v2/%\(tenant_id\)s
+#+END_SRC
+*** 同步数据并重启服务
+#+BEGIN_SRC sh
+cinder-manage db sync
+service cinder-scheduler restart
+service cinder-api restart
+service cinder-volume restart
+service tgt restart
+#+END_SRC
+*** 检查
+#+BEGIN_SRC sh
+cinder list #无输出
+#+END_SRC
+** 安装配置neutron
+*** 安装neutron-server
+#+BEGIN_SRC sh
+apt-get install neutron-server
+#+END_SRC
+*** 编辑配置文件
+编辑/etc/neutron/neutron.conf 
+#+BEGIN_SRC sh
+[DEFAULT]
+debug = True
+verbose = True
+allow_overlapping_ips = True
+core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
+service_plugins = neutron.plugins.services.agent_loadbalancer.plugin.LoadBalancerPlugin
+service_plugins = neutron.services.firewall.fwaas_plugin.FirewallPlugin
+api_paste_config = /etc/neutron/api-paste.ini
+
+auth_strategy = keystone
+
+rpc_backend = neutron.openstack.common.rpc.impl_kombu
+rabbit_host = 172.16.0.251
+rabbit_port = 5672
+rabbit_userid = guest
+rabbit_password = guest
+
+[database]
+connection = mysql://neutron:neutron@172.16.0.251/neutron
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+auth_url = http://172.16.0.251:35357/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+#+END_SRC
+编辑/etc/neutron/api-paste.ini
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host=172.16.0.251
+auth_uri=http://172.16.0.251:5000
+admin_user=neutron
+admin_tenant_name=service
+admin_password=neutron
+#+END_SRC
+编辑/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+#+BEGIN_SRC sh
+[DATABASE]
+connection = mysql://neutron:neutron@172.16.0.251/neutron
+[securitygroup]
+# Firewall driver for realizing neutron security group function.
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+[ovs]
+tenant_network_type = gre
+tunnel_id_ranges = 1:1000
+enable_tunneling = True
+#+END_SRC
+*** 重启服务
+#+BEGIN_SRC sh
+/etc/init.d/neutron-server restart
+#+END_SRC
+** Nova
+*** 安装nova组件
+#+BEGIN_SRC sh
+apt-get install nova-novncproxy novnc nova-api python-novaclient \
+nova-ajax-console-proxy nova-cert nova-conductor \
+nova-consoleauth nova-doc nova-scheduler
+#+END_SRC
+*** 删除默认nova的sqlite db文件
+#+BEGIN_SRC sh
+rm -f /var/lib/nova/nova.sqlite
+#+END_SRC
+
+*** 修改配置文件
+修改/etc/nova/nova.conf，原有基础上添加
+#+BEGIN_SRC sh
+[DEFAULT]
+#vnc
+my_ip=172.16.0.251
+vnc_enabled=True
+vncserver_listen=0.0.0.0
+vncserver_proxyclient_address=172.16.0.251
+novncproxy_base_url=http://192.168.60.151:6080/vnc_auto.html
+
+#Messaging
+rpc_backend = nova.rpc.impl_kombu
+rabbit_host = 172.16.0.251
+rabbit_password = guest
+
+#Glance
+glance_host = 172.16.0.251
+
+#Auth
+auth_strategy=keystone
+
+#Nova Metadata
+neutron_metadata_proxy_shared_secret = cdccc11cf024bd7de58e
+service_neutron_metadata_proxy = true
+
+#Ceilometer
+instance_usage_audit=True
+instance_usage_audit_period=hour
+notify_on_state_change=vm_and_task_state
+notification_driver=nova.openstack.common.notifier.rpc_notifier
+notification_driver=ceilometer.compute.nova_notifier
+
+#neutron
+network_api_class=nova.network.neutronv2.api.API
+neutron_url=http://172.16.0.251:9696
+neutron_auth_strategy=keystone
+neutron_admin_tenant_name=service
+neutron_admin_username=neutron
+neutron_admin_password=neutron
+neutron_admin_auth_url=http://172.16.0.251:35357/v2.0
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+firewall_driver=nova.virt.firewall.NoopFirewallDriver
+security_group_api=neutron
+
+[database]
+connection = mysql://nova:nova@172.16.0.251/nova
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+#+END_SRC
+修改/etc/nova/api-paste.ini的[filter:authtoken]部分
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://172.16.0.251:5000/v2.0
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+#+END_SRC
+*** 创建用户与角色
+#+BEGIN_SRC sh
+keystone user-create --name=nova --pass=nova --email=nova@example.com
+keystone user-role-add --user=nova --tenant=service --role=admin
+#+END_SRC
+*** 创建service服务和endpoint
+#+BEGIN_SRC sh
+nova_id=$(keystone service-create --name=nova --type=compute \
+--description="Nova Compute service" | awk '/ id / { print $4 }')
+
+keystone endpoint-create \
+--service-id=$nova_id \
+--publicurl=http://172.16.0.251:8774/v2/%\(tenant_id\)s \
+--internalurl=http://172.16.0.251:8774/v2/%\(tenant_id\)s \
+--adminurl=http://172.16.0.251:8774/v2/%\(tenant_id\)s
+#+END_SRC
+*** 重启nova服务
+同步数据
+#+BEGIN_SRC sh
+nova-manage db sync
+#+END_SRC
+重启服务
+#+BEGIN_SRC sh
+cd /etc/init.d/; for i in $( ls nova-* ); do sudo service $i restart; done
+#+END_SRC
+#查看服务状态
+#+BEGIN_SRC sh
+nova-manage service list
+Binary           Host                                 Zone             Status     State Updated_At
+nova-cert        control                              internal         enabled    :-)   None      
+nova-conductor   control                              internal         enabled    :-)   None      
+nova-consoleauth control                              internal         enabled    :-)   None      
+nova-scheduler   control                              internal         enabled    :-)   None
+应该看到4个:)
+#+END_SRC
+测试nova是否安装正常
+#+BEGIN_SRC sh
+nova image-list
+#+END_SRC
+** 安装horizon
+#+BEGIN_SRC sh
+apt-get install memcached libapache2-mod-wsgi openstack-dashboard
+apt-get remove --purge openstack-dashboard-ubuntu-theme
+#+END_SRC
+编辑/etc/openstack_dashboard/local_settings.py设置
+#+BEGIN_SRC sh
+OPENSTACK_KEYSTONE_DEFAULT_ROLE = "admin"
+'enable_firewall' = True
+TIME_ZONE = "Asia/Shanghai"
+#+END_SRC
+重启apache2
+#+BEGIN_SRC sh
+/etc/init.d/apache2 restart
+#+END_SRC
+浏览器访问192.168.60.108/horizon.
+
+** Orchestration Server(Heat)安装
+*** 安装
+#+BEGIN_SRC sh
+apt-get install heat-api heat-api-cfn heat-engine heat-api-cloudwatch
+#+END_SRC
+*** 删除默认heat的sqlite db 文件
+#+BEGIN_SRC sh
+rm -f /var/lib/heat/heat.sqlite
+#+END_SRC
+*** 编辑配置文件
+/etc/heat/heat.conf
+#+BEGIN_SRC sh
+verbose = True
+log_dir=/var/log/heat
+rabbit_host = 172.16.0.251
+rabbit_password = guest
+
+# The SQLAlchemy connection string used to connect to the database
+sql_connection = mysql://heat:heat@172.16.0.251/heat
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://172.16.0.251:5000/v2.0
+admin_tenant_name = service
+admin_user = heat
+admin_password = heat
+[ec2_authtoken]
+auth_uri = http://172.16.0.251:5000/v2.0
+keystone_ec2_uri = http://172.16.0.251:5000/v2.0/ec2tokens
+#+END_SRC
+*** 同步数据
+#+BEGIN_SRC sh
+heat-manage db_sync
+#+END_SRC
+*** 创建用户和角色
+#+BEGIN_SRC sh
+keystone user-create --name=heat --pass=heat --email=heat@example.com
+keystone user-role-add --user=heat --tenant=service --role=admin
+#+END_SRC
+*** 创建服务和endpoint
+#+BEGIN_SRC sh
+heat_id=$(keystone service-create --name=heat --type=orchestration \
+--description="Heat Orchestration API" | awk '/ id / { print $4 }')
+keystone endpoint-create \
+--service-id=$heat_id \
+--publicurl=http://172.16.0.251:8004/v1/%\(tenant_id\)s \
+--internalurl=http://172.16.0.251:8004/v1/%\(tenant_id\)s \
+--adminurl=http://172.16.0.251:8004/v1/%\(tenant_id\)s
+
+heat_cfn_id=$(keystone service-create --name=heat-cfn --type=cloudformation \
+--description="Heat CloudFormation API" | awk '/ id / { print $4 }')
+keystone endpoint-create \
+--service-id=$heat_cfn_id \
+--publicurl=http://172.16.0.251:8000/v1 \
+--internalurl=http://172.16.0.251:8000/v1 \
+--adminurl=http://172.16.0.251:8000/v1
+#+END_SRC
+*** 重启服务
+#+BEGIN_SRC sh
+cd /etc/init.d/; for i in $( ls heat-* ); do sudo service $i restart; done
+#+END_SRC
+*** 创建和管理stacks
+#+BEGIN_SRC sh
+wget https://raw.github.com/openstack/heat-templates/master/cfn/F17/WordPress_Composed_Instances.template
+glance image-create --name F17-x86_64-cfntools --disk-format qcow2 --container-format bare --is-public True --copy-from http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F17-x86_64-cfntools.qcow2
+nova keypair-add heat_key > heat_key.priv
+chmod 600 heat_key.priv
+heat stack-create wordpress --template-file=WordPress_Composed_Instances.template --parameters="DBUsername=wp;DBPassword=wp;KeyName=userkey;LinuxDistribution=F17"
+heat stack-list
+#+END_SRC
+PS:对heat还没有研究，创建stack是网上找的
+** Metering/Monitoring Server（Ceilometer）安装
+*** 安装
+安装服务
+#+BEGIN_SRC sh
+apt-get install ceilometer-api ceilometer-collector ceilometer-agent-central python-ceilometerclient
+#+END_SRC
+安装MongoDB Orchestration 服务需要使用数据库来存储信息，这里使用MongoDB数据库
+#+BEGIN_SRC sh
+apt-get install mongodb
+#+END_SRC
+*** 创建数据库
+运行mongo命令如果报错couldn't connect to server 127.0.0.1:27017 at src/mongo/shell/mongo.js:145运行下面两条命令。 \\
+参考：http://stackoverflow.com/questions/13312358/mongo-couldnt-connect-to-server-127-0-0-127017
+#+BEGIN_SRC sh
+mongod --repair
+service mongodb restart
+#+END_SRC
+#+BEGIN_SRC sh
+mongo
+> use ceilometer
+> db.addUser( { user: "ceilometer",
+pwd: "ceilometer",
+roles: [ "readWrite", "dbAdmin" ]
+} )
+#+END_SRC
+编辑/etc/mongodb.conf
+#+BEGIN_SRC sh
+bind_ip=0.0.0.0
+#+END_SRC
+重启数据库
+#+BEGIN_SRC sh
+service mongodb restart
+#+END_SRC
+*** 修改配置文件
+修改/etc/ceilometer/ceilometer.conf
+#+BEGIN_SRC sh
+cat /etc/ceilometer/ceilometer.conf|grep -v ^$ |grep -v ^#
+[DEFAULT]
+http_control_exchanges=nova
+http_control_exchanges=glance
+http_control_exchanges=neutron
+http_control_exchanges=cinder
+auth_strategy=keystone
+nova_control_exchange=nova
+glance_control_exchange=glance
+neutron_control_exchange=neutron
+lock_path= /var/lock/ceilometer
+state_path = /var/lib/ceilometer
+debug=True
+verbose= True
+log_file= ceilometer.log
+log_dir= /var/log/ceilometer
+notification_driver=ceilometer.openstack.common.notifier.rabbit_notifier
+default_notification_level=INFO
+notification_topics=notifications
+policy_file=policy.json
+rpc_backend=ceilometer.openstack.common.rpc.impl_kombu
+control_exchange=ceilometer
+rabbit_host=172.16.0.251
+rabbit_port=5672
+rabbit_userid=guest
+rabbit_password=guest
+database_connection=mongodb://ceilometer:ceilometer@172.16.0.251:27017/ceilometer
+cinder_control_exchange=cinder
+[publisher_rpc]
+metering_secret=cdccc11cf024bd7de58e
+[ssl]
+[database]
+[alarm]
+[rpc_notifier2]
+[api]
+[service_credentials]
+os_username=ceilometer
+os_password=ceilometer
+os_tenant_name=service
+os_auth_url=http://172.16.0.251:5000/v2.0
+[dispatcher_file]
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+#这里写service,horizon无法加载ceilometer的信息
+admin_tenant_name = admin
+admin_user = admin
+admin_password = password
+auth_url = http://172.16.0.251:5000
+[collector]
+[matchmaker_ring]
+[matchmaker_redis]
+#+END_SRC
+*** 创建用户，角色，服务和endpoint
+#+BEGIN_SRC sh
+keystone user-create --name=ceilometer --pass=CEILOMETER_PASS --email=ceilometer@example.com
+keystone user-role-add --user=ceilometer --tenant=service --role=admin
+
+ceilometer_id=$(keystone service-create --name=ceilometer --type=metering \
+--description="Ceilometer Metering Service" | awk '/ id / { print $4 }')
+keystone endpoint-create \
+--service-id=$ceilometer_id \
+--publicurl=http://172.16.0.251:8777/ \
+--internalurl=http://172.16.0.251:8777/ \
+--adminurl=http://172.16.251:8777/
+#+END_SRC
+*** 重启服务
+#+BEGIN_SRC sh
+cd /etc/init.d/; for i in $( ls ceilometer-* ); do sudo service $i restart; done
+#+END_SRC
+* 网络节点
+** 主机配置
+/etc/hostname,主机名改为network
+
+/etc/hosts加入
+#+BEGIN_SRC sh
+172.16.0.251    control
+172.16.0.252    network
+172.16.0.253    compute
+#+END_SRC
+重启生效
+** 网络配置
+*** /etc/network/interfaces
+#+BEGIN_SRC sh
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+#External network
+auto eth0
+iface eth0 inet static
+address 192.168.60.152
+netmask 255.255.255.0
+gateway 192.168.60.1
+dns-nameservers 8.8.8.8
+
+#Manage network
+auto eth1
+iface eth1 inet static
+address 172.16.0.252
+netmask 255.255.255.0
+
+#Data network
+auto eth2
+iface eth2 inet static
+address 10.10.10.52
+netmask 255.255.255.0
+#+END_SRC
+*** 重启网络
+#+BEGIN_SRC sh
+/etc/init.d/networking restart
+#+END_SRC
+*** IP转发
+#+BEGIN_SRC sh
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+sysctl -p
+#+END_SRC
+** 添加havana源
+#+BEGIN_SRC sh
+apt-get install python-software-properties
+add-apt-repository cloud-archive:havana
+apt-get update && apt-get dist-upgrade
+#+END_SRC
+** 设置NTP
+#+BEGIN_SRC sh
+apt-get install ntp
+sed -i 's/server ntp.ubuntu.com/server 172.16.0.251/g' /etc/ntp.conf
+service ntp restart
+#+END_SRC
+** 网络服务
+*** ovs
+#+BEGIN_SRC sh
+apt-get install -y openvswitch-switch openvswitch-datapath-dkms
+service openvswitch-switch restart
+#+END_SRC
+*** 创建网桥
+#+BEGIN_SRC sh
+ovs-vsctl add-br br-int
+ovs-vsctl add-br br-ex
+ovs-vsctl add-port br-ex eth0
+#+END_SRC
+*** 配置网络
+编辑/etc/network/interfaces
+#+BEGIN_SRC sh
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+#External network
+auto eth0
+iface eth0 inet static
+address 0.0.0.0
+
+auto br-ex
+iface br-ex inet static
+address 192.168.60.152
+netmask 255.255.255.0
+gateway 192.168.60.1
+dns-nameservers 8.8.8.8
+
+#Manage network
+auto eth1
+iface eth1 inet static
+address 172.16.0.252
+netmask 255.255.255.0
+
+#Data network
+auto eth2
+iface eth2 inet static
+address 10.10.10.52
+netmask 255.255.255.0
+#+END_SRC
+*** 重启网络
+#+BEGIN_SRC sh
+ifconfig eth0 0
+/etc/init.d/networking restart
+#+END_SRC
+*** 安装neutron组件
+#+BEGIN_SRC sh
+apt-get install neutron-dhcp-agent  neutron-l3-agent neutron-lbaas-agent neutron-plugin-openvswitch-agent
+#+END_SRC
+*** 修改配置文件
+编辑/etc/neutron/neutron.conf
+#+BEGIN_SRC sh
+[DEFAULT]
+debug = True
+verbose = True
+allow_overlapping_ips = True
+
+core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
+service_plugins = neutron.plugins.services.agent_loadbalancer.plugin.LoadBalancerPlugin
+service_plugins = neutron.services.firewall.fwaas_plugin.FirewallPlugin
+
+api_paste_config = /etc/neutron/api-paste.ini
+
+auth_strategy = keystone
+
+rpc_backend = neutron.openstack.common.rpc.impl_kombu
+rabbit_host = 172.16.0.251
+rabbit_port = 5672
+rabbit_userid = guest
+rabbit_password = guest
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+auth_url = http://172.16.0.251:35357/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+
+[database]
+connection = mysql://neutron:neutron@172.16.0.251/neutron
+#+END_SRC
+编辑/etc/neutron/api-paste.ini
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host=172.16.0.251
+auth_uri=http://172.16.0.251:5000
+admin_user=neutron
+admin_tenant_name=service
+admin_password=neutron
+#+END_SRC
+编辑/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+#+BEGIN_SRC sh
+[DATABASE]
+connection = mysql://neutron:neutron@172.16.0.251/neutron
+[securitygroup]
+# Firewall driver for realizing neutron security group function.
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+[ovs]
+tenant_network_type = gre
+tunnel_id_ranges = 1:1000
+enable_tunneling = True
+integration_bridge = br-int
+tunnel_bridge = br-tun
+local_ip = 10.10.10.52
+#+END_SRC
+/etc/neutron/l3_agent.ini
+#+BEGIN_SRC sh
+auth_url = http://172.16.0.251:35357/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+metadata_ip = 172.16.0.251
+use_namespaces = True
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+#+END_SRC
+/etc/neutron/dhcp_agent.ini
+#+BEGIN_SRC sh
+dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
+use_namespaces = True
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+#+END_SRC
+/etc/neutron/metadata_agent.ini
+#+BEGIN_SRC sh
+[DEFAULT]
+auth_url = http://172.16.0.251:5000/v2.0
+auth_region = regionOne
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+nova_metadata_ip = 172.16.0.251
+metadata_proxy_shared_secret = cdccc11cf024bd7de58e
+#+END_SRC
+编辑/etc/neutron/lbaas_agent.ini
+#+BEGIN_SRC sh
+interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
+device_driver = neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver
+#+END_SRC
+创建/etc/neutron/fwaas_driver.ini
+#+BEGIN_SRC sh
+[fwaas]
+driver = neutron.services.firewall.drivers.linux.iptables_fwaas.IptablesFwaasDriver
+enabled = True
+#+END_SRC
+编辑/etc/init/neutron-l3-agent 补充--config file fwaas_driver.ini
+#+BEGIN_SRC sh
+exec start-stop-daemon --start --chuid neutron --exec /usr/bin/neutron-l3-agent -- --config-file=/etc/neutron/neutron.conf --config-file=/etc/neutron/l3_agent.ini --config-file /etc/neutron/fwaas_driver.ini --log-file=/var/log/neutron/l3-agent.log
+#+END_SRC
+*** 重启服务
+#+BEGIN_SRC sh
+cd /etc/init.d/; for i in $( ls neutron-* ); do sudo service $i restart; done
+#+END_SRC
+* 计算节点
+** 主机配置
+/etc/hostname,主机名改为compute
+
+/etc/hosts加入
+#+BEGIN_SRC sh
+172.16.0.251    control
+172.16.0.252    network
+172.16.0.253    compute
+#+END_SRC
+** 网络配置
+*** /etc/network/interfaces
+#+BEGIN_SRC sh
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+#External network
+auto eth0
+iface eth0 inet static
+address 192.168.60.153
+netmask 255.255.255.0
+gateway 192.168.60.1
+dns-nameservers 8.8.8.8
+
+#Manage network
+auto eth1
+iface eth1 inet static
+address 172.16.0.253
+netmask 255.255.255.0
+
+#Data network
+auto eth2
+iface eth2 inet static
+address 10.10.10.53
+netmask 255.255.255.0
+#+END_SRC
+*** 重启网络
+#+BEGIN_SRC sh
+/etc/init.d/networking restart
+#+END_SRC
+
+*** IP转发
+#+BEGIN_SRC sh
+sed -i 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.conf
+sysctl -p
+#+END_SRC
+** 添加havana源
+#+BEGIN_SRC sh
+apt-get install python-software-properties
+add-apt-repository cloud-archive:havana
+apt-get update && apt-get dist-upgrade
+#+END_SRC
+** 设置NTP
+#+BEGIN_SRC sh
+apt-get install ntp
+sed -i 's/server ntp.ubuntu.com/server 172.16.0.251/g' /etc/ntp.conf
+service ntp restart
+#+END_SRC
+** 网络服务
+*** ovs
+#+BEGIN_SRC sh
+apt-get install -y openvswitch-switch openvswitch-datapath-dkms
+service openvswitch-switch restart
+#+END_SRC
+*** 创建网桥
+#+BEGIN_SRC sh
+ovs-vsctl add-br br-int
+#+END_SRC
+*** 安装ovs代理
+#+BEGIN_SRC sh
+apt-get -y install quantum-plugin-openvswitch-agent
+#+END_SRC
+*** 修改配置文件
+修改/etc/neutron/plugins/openvswitch/ovs_quantum_plugin.ini
+#+BEGIN_SRC sh
+[DATABASE]
+connection = mysql://neutron:neutron@172.16.0.251/neutron
+[securitygroup]
+# Firewall driver for realizing neutron security group function.
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+[ovs]
+tenant_network_type = gre
+tunnel_id_ranges = 1:1000
+enable_tunneling = True
+integration_bridge = br-int
+tunnel_bridge = br-tun
+local_ip = 10.10.10.53
+#+END_SRC
+修改/etc/neutron/neutron.conf
+#+BEGIN_SRC sh
+[DEFAULT]
+debug = True
+verbose = True
+allow_overlapping_ips = True
+
+core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
+service_plugins = neutron.plugins.services.agent_loadbalancer.plugin.LoadBalancerPlugin
+service_plugins = neutron.services.firewall.fwaas_plugin.FirewallPlugin
+
+api_paste_config = /etc/neutron/api-paste.ini
+
+auth_strategy = keystone
+
+rpc_backend = neutron.openstack.common.rpc.impl_kombu
+rabbit_host = 172.16.0.251
+rabbit_port = 5672
+rabbit_userid = guest
+rabbit_password = guest
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+auth_url = http://172.16.0.251:35357/v2.0
+admin_tenant_name = service
+admin_user = neutron
+admin_password = neutron
+
+[database]
+connection = mysql://neutron:neutron@172.16.0.251/neutron
+#+END_SRC
+*** 重启服务
+#+BEGIN_SRC sh
+service neutron-plugin-openvswitch-agent restart
+#+END_SRC
+** Nova
+*** 安装nova-compute
+#+BEGIN_SRC sh
+apt-get install nova-compute-kvm python-guestfs
+#+END_SRC
+安装过程的提示，选yes
+*** 修复guestfs的一个bug
+#+BEGIN_SRC sh
+chmod 0644 /boot/vmlinuz*
+#+END_SRC
+*** 修改配置文件
+编辑/etc/nova/api-paste.ini 
+#+BEGIN_SRC sh
+[filter:authtoken]
+paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+auth_uri = http://172.16.0.251:5000/v2.0
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+#+END_SRC
+编辑/etc/nova/nova.conf,添加
+#+BEGIN_SRC sh
+[DEFAULT]
+#vnc
+my_ip=172.16.0.253
+vnc_enabled=True
+vncserver_listen=0.0.0.0
+vncserver_proxyclient_address=172.16.0.253
+novncproxy_base_url=http://192.168.60.151:6080/vnc_auto.html
+
+#Messaging
+rpc_backend = nova.rpc.impl_kombu
+rabbit_host = 172.16.0.251
+rabbit_password = guest
+
+#Glance
+glance_host = 172.16.0.251
+
+#Auth
+auth_strategy=keystone
+
+#Nova Metadata
+neutron_metadata_proxy_shared_secret = cdccc11cf024bd7de58e
+service_neutron_metadata_proxy = true
+
+#Ceilometer
+instance_usage_audit=True
+instance_usage_audit_period=hour
+notify_on_state_change=vm_and_task_state
+notification_driver=nova.openstack.common.notifier.rpc_notifier
+notification_driver=ceilometer.compute.nova_notifier
+
+#neutron
+network_api_class=nova.network.neutronv2.api.API
+neutron_url=http://172.16.0.251:9696
+neutron_auth_strategy=keystone
+neutron_admin_tenant_name=service
+neutron_admin_username=neutron
+neutron_admin_password=neutron
+neutron_admin_auth_url=http://172.16.0.251:35357/v2.0
+linuxnet_interface_driver = nova.network.linux_net.LinuxOVSInterfaceDriver
+firewall_driver=nova.virt.firewall.NoopFirewallDriver
+security_group_api=neutron
+
+[database]
+connection = mysql://nova:nova@172.16.0.251/nova
+
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+admin_tenant_name = service
+admin_user = nova
+admin_password = nova
+#+END_SRC
+*** 重启服务
+#+BEGIN_SRC sh
+service nova-compute restart
+#+END_SRC
+*** 验证服务
+这个时候在控制节点检查nova服务
+#+BEGIN_SRC sh
+Binary           Host                                 Zone             Status     State Updated_At
+nova-cert        control                              internal         enabled    :-)   2013-12-27 11:32:40
+nova-conductor   control                              internal         enabled    :-)   2013-12-27 11:32:40
+nova-consoleauth control                              internal         enabled    :-)   2013-12-27 11:32:41
+nova-scheduler   control                              internal         enabled    :-)   2013-12-27 11:32:40
+nova-compute     compute                              nova             enabled    :-)   2013-12-27 11:32:44
+#+END_SRC
+可以看到nova-compute已加入
+
+
+** Metering/Monitoring Server（Ceilometer）安装
+*** 安装
+安装服务
+#+BEGIN_SRC sh
+apt-get install ceilometer-agent-compute
+#+END_SRC
+*** 修改配置文件
+修改/etc/ceilometer/ceilometer.conf
+#+BEGIN_SRC sh
+cat /etc/ceilometer/ceilometer.conf|grep -v ^$ |grep -v ^#
+[DEFAULT]
+http_control_exchanges=nova
+http_control_exchanges=glance
+http_control_exchanges=neutron
+http_control_exchanges=cinder
+auth_strategy=keystone
+nova_control_exchange=nova
+glance_control_exchange=glance
+neutron_control_exchange=neutron
+lock_path= /var/lock/ceilometer
+state_path = /var/lib/ceilometer
+debug=True
+verbose= True
+log_file= ceilometer.log
+log_dir= /var/log/ceilometer
+notification_driver=ceilometer.openstack.common.notifier.rabbit_notifier
+default_notification_level=INFO
+notification_topics=notifications
+policy_file=policy.json
+rpc_backend=ceilometer.openstack.common.rpc.impl_kombu
+control_exchange=ceilometer
+rabbit_host=172.16.0.251 
+rabbit_port=5672
+rabbit_userid=guest
+rabbit_password=guest
+database_connection= mongodb://ceilometer:ceilometer@172.16.0.251:27017/ceilometer
+cinder_control_exchange=cinder
+[publisher_rpc]
+metering_secret=cdccc11cf024bd7de58e
+[ssl]
+[database]
+[alarm]
+[rpc_notifier2]
+[api]
+[service_credentials]
+os_username=ceilometer
+os_password=ceilometer
+os_tenant_name=service
+os_auth_url=http://172.16.0.251:5000/v2.0
+[dispatcher_file]
+[keystone_authtoken]
+auth_host = 172.16.0.251
+auth_port = 35357
+auth_protocol = http
+#这里写service,horizon无法加载ceilometer的信息
+admin_tenant_name = admin
+admin_user = admin
+admin_password = password
+auth_url = http://172.16.0.251:5000
+[collector]
+[matchmaker_ring]
+[matchmaker_redis]
+#+END_SRC
+*** 重启服务
+#+END_SR
+#+BEGIN_SRC sh
+cd /etc/init.d/; for i in $( ls ceilometer-* ); do sudo service $i restart; done
+#+END_SRC
+*安装结束.*
